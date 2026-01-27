@@ -1,3 +1,9 @@
 asgiref==3.11.0
 Django==6.0.1
 sqlparse==0.5.5
+
+# Formatting and linting tools
+flake8==5.0.4
+flake8-quotes==3.3.1
+flake8-variables-names==0.0.5
+pep8-naming==0.13.2
