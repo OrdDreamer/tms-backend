@@ -43,9 +43,9 @@ INSTALLED_APPS = [
 
     # Local apps
     "apps.users",
+    "apps.languages",
     "apps.projects",
     "apps.translations",
-    "apps.history",
     "apps.integrations",
 ]
 
