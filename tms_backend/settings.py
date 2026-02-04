@@ -42,8 +42,8 @@ INSTALLED_APPS = [
     # Third-party apps
 
     # Local apps
+    "apps.core",
     "apps.users",
-    "apps.languages",
     "apps.projects",
     "apps.translations",
     "apps.integrations",

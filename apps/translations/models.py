@@ -1,6 +1,6 @@
 from django.db import models
 
-from apps.languages.models import Language
+from apps.core.choices import LanguageChoices
 
 
 class TranslationKey(models.Model):
@@ -9,14 +9,13 @@ class TranslationKey(models.Model):
     """
     key = models.CharField(
         max_length=255,
-        unique=True,
         help_text="Unique identifier for the translation"
     )
     project = models.ForeignKey(
         "projects.Project",
         on_delete=models.CASCADE,
         related_name="translation_keys",
-        help_text="Unique identifier for the translation"
+        help_text="Project this translation key belongs to"
     )
     description = models.TextField(
         blank=True,
@@ -24,6 +23,12 @@ class TranslationKey(models.Model):
     )
 
     class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["key", "project"],
+                name="unique_key_per_project"
+            )
+        ]
         ordering = ["key"]
         verbose_name = "Translation Key"
         verbose_name_plural = "Translation Keys"
@@ -42,11 +47,10 @@ class TranslationValue(models.Model):
         related_name="values",
         help_text="The translation key this value belongs to"
     )
-    language = models.ForeignKey(
-        Language,
-        on_delete=models.CASCADE,
-        related_name="translation_values",
-        help_text="Language of the translation"
+    language = models.CharField(
+        max_length=10,
+        choices=LanguageChoices.choices,
+        help_text="Language of the translation (ISO 639-1)"
     )
     value = models.TextField(
         help_text="Translated text"
@@ -66,5 +70,5 @@ class TranslationValue(models.Model):
     def __str__(self):
         return (
             f"{self.translation_key.key} "
-            f"[{self.language.code}]: {self.value[:50]}"
+            f"[{self.get_language_display()}]: {self.value[:50]}"
         )
