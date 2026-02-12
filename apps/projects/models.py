@@ -43,6 +43,14 @@ class ProjectLanguage(BaseModel):
 
     Each project can have multiple target languages for translation.
     The base language is stored in Project.base_language.
+
+    NOTE:
+    The validation and business restrictions in this model (e.g., preventing
+    deletion of the base language, ensuring at least one language exists,
+    enforcing a single base language) are left here for historical/contextual
+    purposes and “as-is”. Full business logic and constraints should be enforced
+    at the service layer. Some of these checks can be safely removed here if
+    they conflict with service-layer implementation.
     """
     project = models.ForeignKey(
         Project,
@@ -65,6 +73,12 @@ class ProjectLanguage(BaseModel):
         """
         Each project-language relationship must be unique.
         Only one base language is allowed per project.
+
+        NOTE:
+        These constraints are left in the model for historical/reference purposes.
+        The full enforcement of business rules (e.g., base language uniqueness,
+        deletion restrictions) should be done at the service layer. Some of these
+        constraints can be removed if the service layer fully guarantees consistency.
         """
         constraints = [
             models.UniqueConstraint(
@@ -86,6 +100,12 @@ class ProjectLanguage(BaseModel):
     def clean(self):
         """
         Ensure that each project always has a base language.
+
+        NOTE:
+        This validation is kept for reference and convenience.
+        Full business logic for language assignment should be handled
+        in the service layer. Some checks here can be safely removed
+        if they conflict with service-layer logic.
         """
         base_language_does_not_exist = not ProjectLanguage.objects.filter(
             project=self.project,
@@ -103,6 +123,10 @@ class ProjectLanguage(BaseModel):
     def delete(self, *args, **kwargs):
         """
         Prevent deleting the base language or the last language of a project.
+
+        NOTE:
+        This check is kept for reference and convenience.
+        Full deletion logic should be enforced in the service layer.
         """
         if self.is_base_language:
             raise ValidationError(
@@ -126,6 +150,10 @@ class ProjectLanguage(BaseModel):
         """
         Atomically sets this language as the base language,
         unsetting the previous one.
+
+        NOTE:
+        This is left in the model for convenience. Full base-language
+        assignment logic should be handled in the service layer.
         """
         if self.is_base_language:
             return
