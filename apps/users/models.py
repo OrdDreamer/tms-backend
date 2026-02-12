@@ -4,9 +4,27 @@ from django.db import models
 
 
 class CustomUserManager(BaseUserManager):
+    """
+    Custom manager for the User model that uses email as the unique
+    identifier instead of username.
+
+    Responsibilities:
+    - Ensures email normalization before user creation.
+    - Enforces correct flags for regular users and superusers.
+    - Provides case-insensitive authentication by normalizing
+      email during lookup.
+    - Centralizes user creation logic to maintain invariants.
+
+    This manager guarantees that:
+    - Email is required.
+    - Superusers always have is_staff=True and is_superuser=True.
+    - Email-based authentication behaves consistently.
+    """
     def _create_user(self, email, password, **extra_fields):
+        if not email:
+            raise ValueError("The Email field must be set")
         # Normalize the domain part of the email
-        email = self.normalize_email(email)
+        email = self.normalize_email(email).lower()
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
@@ -20,6 +38,13 @@ class CustomUserManager(BaseUserManager):
     def create_superuser(self, email, password, **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
+
+        if not extra_fields.get("is_staff") is True:
+            raise ValueError("Superuser must have is_staff=True.")
+
+        if extra_fields.get("is_superuser") is not True:
+            raise ValueError("Superuser must have is_superuser=True.")
+
         return self._create_user(email, password, **extra_fields)
 
     def get_by_natural_key(self, username):
@@ -27,7 +52,7 @@ class CustomUserManager(BaseUserManager):
         Normalize email before lookup so that varying case in the domain
         doesn’t block authentication.
         """
-        email = self.normalize_email(username)
+        email = self.normalize_email(username).lower()
         return self.get(**{self.model.USERNAME_FIELD: email})
 
 
@@ -39,7 +64,7 @@ class User(AbstractUser):
     username = None
     email = models.EmailField(
         unique=True,
-        help_text="Email address used as the unique identifier for login"
+        help_text="Email address used as the unique identifier for login",
     )
 
     USERNAME_FIELD = "email"
