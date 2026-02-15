@@ -1,11 +1,11 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 from apps.users.models import User
 
 
 @admin.register(User)
-class UserAdmin(UserAdmin):
+class UserAdmin(BaseUserAdmin):
     """
     Custom admin configuration for the User model.
 
@@ -26,7 +26,16 @@ class UserAdmin(UserAdmin):
 
     fieldsets = (
         (None, {"fields": ("email", "first_name", "last_name", "password")}),
-        ("Permissions", {"fields": ("is_staff", "is_superuser", "is_active", "groups", "user_permissions")}),
+        ("Permissions", {
+            "fields": (
+                "is_staff",
+                "is_superuser",
+                "is_active",
+                "groups",
+                "user_permissions"
+            )
+        }),
+        ("Important dates", {"fields": ("last_login", "date_joined")}),
     )
 
     add_fieldsets = (

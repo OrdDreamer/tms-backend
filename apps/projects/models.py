@@ -1,6 +1,5 @@
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
-from django.db.models import Case, When, Value, BooleanField
 
 from apps.core.choices import LanguageChoices
 from apps.core.models import BaseModel
@@ -26,7 +25,7 @@ class Project(BaseModel):
     )
 
     class Meta:
-        ordering = ["slug", "name"]
+        ordering = ["name"]
         verbose_name = "Project"
         verbose_name_plural = "Projects"
 
@@ -34,7 +33,10 @@ class Project(BaseModel):
         return f"({self.slug}) {self.name}"
 
     def get_base_language(self):
-        return self.languages.filter(is_base_language=True).first()
+        for lang in self.languages.all():
+            if lang.is_base_language:
+                return lang
+        return None
 
 
 class ProjectLanguage(BaseModel):
@@ -48,9 +50,9 @@ class ProjectLanguage(BaseModel):
     The validation and business restrictions in this model (e.g., preventing
     deletion of the base language, ensuring at least one language exists,
     enforcing a single base language) are left here for historical/contextual
-    purposes and “as-is”. Full business logic and constraints should be enforced
-    at the service layer. Some of these checks can be safely removed here if
-    they conflict with service-layer implementation.
+    purposes and “as-is”. Full business logic and constraints should be
+    enforced at the service layer. Some of these checks can be safely removed
+    here if they conflict with service-layer implementation.
     """
     project = models.ForeignKey(
         Project,
@@ -75,10 +77,11 @@ class ProjectLanguage(BaseModel):
         Only one base language is allowed per project.
 
         NOTE:
-        These constraints are left in the model for historical/reference purposes.
-        The full enforcement of business rules (e.g., base language uniqueness,
-        deletion restrictions) should be done at the service layer. Some of these
-        constraints can be removed if the service layer fully guarantees consistency.
+        These constraints are left in the model for historical/reference
+        purposes. The full enforcement of business rules (e.g., base language
+        uniqueness, deletion restrictions) should be done at the service layer.
+        Some of these constraints can be removed if the service layer fully
+        guarantees consistency.
         """
         constraints = [
             models.UniqueConstraint(
@@ -107,6 +110,9 @@ class ProjectLanguage(BaseModel):
         in the service layer. Some checks here can be safely removed
         if they conflict with service-layer logic.
         """
+        if not self.project:
+            return
+
         base_language_does_not_exist = not ProjectLanguage.objects.filter(
             project=self.project,
             is_base_language=True
@@ -158,15 +164,19 @@ class ProjectLanguage(BaseModel):
         if self.is_base_language:
             return
 
-        ProjectLanguage.objects.select_for_update().filter(
-            project=self.project
-        ).update(
-            is_base_language=Case(
-                When(pk=self.pk, then=Value(True)),
-                default=Value(False),
-                output_field=BooleanField(),
-            )
-        )
+        project_languages = (ProjectLanguage
+                             .objects
+                             .select_for_update()
+                             .filter(project=self.project))
+
+        project_languages.filter(
+            is_base_language=True,
+        ).update(is_base_language=False)
+
+        project_languages.filter(
+            pk=self.pk,
+        ).update(is_base_language=True)
+
         self.refresh_from_db(fields=["is_base_language"])
 
     def __repr__(self):
