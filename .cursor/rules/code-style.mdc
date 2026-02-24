@@ -1,0 +1,86 @@
+---
+description: Стиль коду для проєкту
+globs: **/*.py
+alwaysApply: true
+---
+
+# Django Codestyle
+
+## Architecture
+- Бізнес-логіка живе в `utils` layer. НЕ в views, serializers, signals, save(), managers
+- Stack: DRF (API) + Django Admin (ops) + Celery (background)
+
+## Models
+- Усі моделі наслідують abstract `BaseModel`: `id` (UUID, pk), `created_at` (db_index, default=timezone.now), `updated_at` (auto_now)
+- Проста валідація → `clean()`. Складна → utils
+- `@property` лише для простих обчислень
+- FK: `CASCADE` для ownership, `PROTECT` для critical refs. Завжди `related_name`
+- M2M з extra data → through model
+- Statuses/enums → `models.TextChoices`. Бізнес-ліміти → inner class `Limits`
+
+## Utils
+- Naming: `{entity}_{action}()` з keyword-only args: `def order_create(*, customer, items_data)`
+- Малий app → `utils.py`. Великий → `utils/` package, `__init__.py` реекспортує
+- Завжди `select_related`/`prefetch_related`. Статистика через `annotate`/`aggregate`
+- `@transaction.atomic` для multi-write ops. `select_for_update()` при race conditions
+- Celery tasks запускати через `transaction.on_commit()`, не напряму в atomic
+- `save(update_fields=[...])` замість повного save
+
+## APIs & Serializers
+
+### File layout
+- `serializers/api.py` — Filter/Input/Output serializers; `serializers/fetch.py` — external data validation
+- Тільки plain `serializers.Serializer`, НЕ `ModelSerializer`
+- Nested serializers — уникати; max 2 рівні
+
+### Serializer naming
+- `{Entity}ListFilterSerializer`, `{Entity}CreateInputSerializer`, `{Entity}ListOutputSerializer`
+
+### View pattern
+- View = deserialize → call utils → serialize → respond. Жодної бізнес-логіки
+- Pagination: inner class `Pagination(LimitOffsetPagination)` з `default_limit`, `max_limit`
+
+### View naming: `{Entity}{Action}APIView`
+- Standard: `List`, `Create`, `Detail`, `Update`, `Delete`
+- Combined: `ListCreate`, `DetailUpdate`
+- Custom: `OrderCancelAPIView`, `CustomerVerifyAPIView`
+- Заборонено: `OrderAPIView`, `OrderView`, `CreateOrder`
+
+## Admin
+- `list_display`, `list_filter`, `search_fields`, `readonly_fields`, `raw_id_fields`
+- `fieldsets` з групами; timestamps → `collapse`
+- `get_queryset` → `select_related` + `annotate` для computed columns
+- `format_html` для links/colors; `admin_order_field` для сортування
+- Bulk actions делегують у utils. Inlines: `TabularInline`, `extra=0`
+
+## URLs
+- Collection: `name='{entity}-list'`; Resource: `name='{entity}-detail'`; Custom: `name='{entity}-{action}'`
+- Hyphens, lowercase. Шаблон: `path('api/v1/orders/', include('orders.urls'))`
+- UUID pks: `<uuid:order_id>/`
+
+## Settings
+- `settings/` package: `base.py`, `local.py`, `production.py`, `test.py`
+- `django-environ`: `env = environ.Env()`. Secrets без defaults
+- i18n fields: `name_en`, `name_uk`, ... + `get_localized_name(lang)` з fallback на `_en`
+
+## Error Handling
+- Base: `ApplicationError(message, extra={})`; domain subclasses: `OrderError(ApplicationError)`
+- Custom DRF `EXCEPTION_HANDLER`. Єдиний формат: `{"message": "...", "extra": {...}}`
+- `ApplicationError` → 400; Django `ValidationError` → 400; DRF errors → стандартизовані
+
+## Testing
+- Структура: `tests/factories.py`, `tests/utils/`, `tests/models/`, `tests/apis/`
+- `factory.django.DjangoModelFactory` з `SubFactory`, `Faker`
+- Фокус — тести utils layer. Success + error paths. `@patch` для external calls
+
+## Celery
+- Task = thin wrapper: fetch object → call utils → return message string
+- Import моделей всередині task body (circular imports)
+- `ApplicationError` → не retry. Інше → retry, exponential backoff: `countdown = 60 * (2 ** self.request.retries)`
+- `bind=True, max_retries=N`, `on_failure` callback
+- Periodic: `django-celery-beat`, `DatabaseScheduler`. Routing: `CELERY_TASK_ROUTES`
+
+## Performance
+- DB indexes (`Meta.indexes`) для часто фільтрованих полів
+- `django.core.cache` для read-heavy data
+- Bulk ops: `bulk_create`, `bulk_update`, `filter().update()`
