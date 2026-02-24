@@ -418,3 +418,7 @@ fabric.properties
 # https://plugins.jetbrains.com/plugin/8053-azure-toolkit-for-intellij
 
 # End of https://www.toptal.com/developers/gitignore/api/django,pycharm,pycharm+all,webstorm
+
+.cursor
+.idea
+.vscode
