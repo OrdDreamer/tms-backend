@@ -1,6 +1,7 @@
 from django.contrib import admin, messages
 
 from apps.projects.models import Project, ProjectLanguage
+from apps.projects.utils import project_language_set_base
 
 
 @admin.register(Project)
@@ -79,7 +80,7 @@ class ProjectLanguageAdmin(admin.ModelAdmin):
             return
 
         project_language = queryset.first()
-        project_language.set_base_language()
+        project_language_set_base(project_language=project_language)
         self.message_user(
             request,
             f"{project_language.get_language_display()} "

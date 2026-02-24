@@ -37,7 +37,6 @@ INSTALLED_APPS = [
 
     # Third-party apps
     "rest_framework",
-    "drf_standardized_errors",
 
     # Local apps
     "apps.core",
@@ -114,7 +113,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
-    "EXCEPTION_HANDLER": "drf_standardized_errors.handler.exception_handler",
+    "EXCEPTION_HANDLER": "apps.core.exception_handlers.custom_exception_handler",
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
     ],

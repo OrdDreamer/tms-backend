@@ -94,7 +94,7 @@ class TranslationValue(BaseModel):
     )
     language = models.CharField(
         max_length=5,
-        choices=LanguageChoices.choices,
+        choices=LanguageChoices,
         help_text="Language of the translation (ISO 639-1)"
     )
     value = models.TextField(
