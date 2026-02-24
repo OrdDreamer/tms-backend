@@ -4,21 +4,35 @@ from django.db import models
 from apps.core.choices import LanguageChoices
 from apps.core.models import BaseModel
 
-lowercase_underscore_validator = RegexValidator(
-    regex=r"^[a-z]+(_[a-z]+)*$",
-    message=('Use lowercase letters separated by a single "_" '
-             "(e.g., my_code_name).")
+key_validator = RegexValidator(
+    regex=r"^[a-z0-9]+(?:[._][a-z0-9]+)*$",
+    message=('Use lowercase letters and digits separated by "_" or "." '
+             "(e.g., my_code_name, api.v1.endpoint).")
+)
+
+KEY_FORMAT_HELP = (
+    "Lowercase letters and digits (a-z, 0-9), separated by dot or underscore; "
+    "e.g. api.v1.endpoint or form.submit_button. At least 2 segments."
 )
 
 
 class TranslationKey(BaseModel):
     """
     Represents a key for translations within a project.
+
+    Key format constraints (desired validation):
+
+    - Keys must match: ^[a-z0-9]+(?:[._][a-z0-9]+)*$
+    - Allowed chars: a-z, 0-9, ., _
+    - Dot (.) separates namespaces
+    - Underscore (_) separates words inside a segment
+    - Keys must be at least 2 segments long
+    - No flat keys
     """
     key = models.CharField(
         max_length=255,
-        help_text="Unique identifier for the translation",
-        validators=[lowercase_underscore_validator],
+        help_text=KEY_FORMAT_HELP,
+        validators=[key_validator],
     )
     project = models.ForeignKey(
         "projects.Project",
