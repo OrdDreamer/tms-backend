@@ -85,7 +85,8 @@ def _validate_language_belongs_to_project(*, translation_key, language):
 
 
     Raises:
-        TranslationError — if the language is not in the project's language set.
+        TranslationError — if the language is not in the project's
+        language set.
     """
     exists = ProjectLanguage.objects.filter(
         project=translation_key.project,
@@ -287,7 +288,8 @@ def translation_key_create_with_values(
 
 def translation_key_bulk_create(*, project, keys_data):
     """
-    Bulk create multiple translation keys (optionally with values) for a project.
+    Bulk create multiple translation keys (optionally with values)
+    for a project.
 
     Intended for import scenarios (e.g. uploading a JSON/YAML file with
     all keys and translations at once).

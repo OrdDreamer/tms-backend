@@ -71,7 +71,8 @@ class TranslationValueAdmin(admin.ModelAdmin):
         return qs.select_related("translation_key", "translation_key__project")
 
     def display_translation_key(self, obj):
-        return f"{obj.translation_key.key} ({obj.translation_key.project.slug})"
+        tk = obj.translation_key
+        return f"{tk.key} ({tk.project.slug})"
 
     display_translation_key.short_description = "Translation Key"
 

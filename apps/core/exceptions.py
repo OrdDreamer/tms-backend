@@ -4,6 +4,7 @@ class ApplicationError(Exception):
         self.message = message
         self.extra = extra or {}
 
+
 class ValidationError(ApplicationError):
     """
     Exception raised when a validation error occurs.

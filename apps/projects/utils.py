@@ -28,7 +28,8 @@ def project_create(*, slug, name, description=""):
 
 def project_delete(*, project):
     """
-    Delete a project and all related data (languages, keys, values via CASCADE).
+    Delete a project and all related data
+    (languages, keys, values via CASCADE).
 
     Args:
         project: Project — instance to delete.
@@ -208,7 +209,11 @@ def project_language_bulk_add(*, project, languages_data):
         django.core.exceptions.ValidationError — if any (project, language)
             pair already exists.
     """
-    base_entries = [item for item in languages_data if item.get("is_base_language")]
+    base_entries = [
+        item
+        for item in languages_data
+        if item.get("is_base_language")
+    ]
     if len(base_entries) > 1:
         raise ProjectError("Only one language can be set as base.")
 
