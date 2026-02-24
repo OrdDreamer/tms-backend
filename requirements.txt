@@ -3,6 +3,9 @@ Django==6.0.1
 django-environ==0.12.0
 psycopg[binary]==3.2.6
 sqlparse==0.5.5
+djangorestframework
+djangorestframework-simplejwt
+drf-standardized-errors
 
 # Formatting and linting tools
 flake8==5.0.4
