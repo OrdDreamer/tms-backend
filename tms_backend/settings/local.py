@@ -1,4 +1,4 @@
-from .base import *
+from .base import *  # noqa: F403
 from .base import BASE_DIR, REST_FRAMEWORK
 
 DEBUG = True

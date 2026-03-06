@@ -5,6 +5,28 @@ from apps.projects.models import ProjectLanguage
 from apps.translations.models import TranslationKey, TranslationValue
 
 
+def _validate_language_belongs_to_project(*, translation_key, language):
+    """
+    Assert that a language is configured for the translation key's project.
+
+
+    Raises:
+        TranslationError — if the language is not in the project's
+        language set.
+    """
+    exists = ProjectLanguage.objects.filter(
+        project=translation_key.project,
+        language=language,
+    ).exists()
+
+    if not exists:
+        raise TranslationError(
+            f"Language '{language}' is not configured for project "
+            f"'{translation_key.project.slug}'.",
+            extra={"language": language},
+        )
+
+
 def translation_key_create(*, project, key, description=""):
     """
     Create a new translation key for a project.
@@ -77,28 +99,6 @@ def translation_key_delete(*, translation_key):
         translation_key: TranslationKey — instance to delete.
     """
     translation_key.delete()
-
-
-def _validate_language_belongs_to_project(*, translation_key, language):
-    """
-    Assert that a language is configured for the translation key's project.
-
-
-    Raises:
-        TranslationError — if the language is not in the project's
-        language set.
-    """
-    exists = ProjectLanguage.objects.filter(
-        project=translation_key.project,
-        language=language,
-    ).exists()
-
-    if not exists:
-        raise TranslationError(
-            f"Language '{language}' is not configured for project "
-            f"'{translation_key.project.slug}'.",
-            extra={"language": language},
-        )
 
 
 def translation_value_create(*, translation_key, language, value):
@@ -286,28 +286,53 @@ def translation_key_create_with_values(
     return result
 
 
-def translation_key_bulk_create(*, project, keys_data):
+def translation_key_bulk_delete(*, project, key_ids):
     """
-    Bulk create multiple translation keys (optionally with values)
-    for a project.
+    Delete multiple translation keys by IDs within a project.
 
-    Intended for import scenarios (e.g. uploading a JSON/YAML file with
-    all keys and translations at once).
+    Only keys belonging to the given project are deleted; IDs from other
+    projects are silently ignored.
 
     Args:
-        project: Project — target project.
-        keys_data: list[dict] — items with keys:
-            "key" (str) — key identifier,
-            "description" (str, optional) — human-readable description,
-            "values" (list[dict], optional) — each with
-                "language" (str) and "value" (str).
+        project: Project — project the keys belong to.
+        key_ids: list[UUID] — IDs of the keys to delete.
 
     Returns:
-        Not yet implemented.
-
-    Raises:
-        NotImplementedError — always; reserved for the import feature.
+        int — number of keys actually deleted.
     """
-    raise NotImplementedError(
-        "translation_key_bulk_create is reserved for the import feature."
+    deleted_count, _ = TranslationKey.objects.filter(
+        project=project,
+        id__in=key_ids,
+    ).delete()
+    return deleted_count
+
+
+def project_translations_export(*, project, language=None):
+    """
+    Export translations for a project.
+
+    Single language returns a flat dict: {"key": "value"}.
+    All languages returns a nested dict: {"lang": {"key": "value"}}.
+
+    Args:
+        project: Project — project to export.
+        language: str | None — if set, export only this language.
+
+    Returns:
+        dict — flat or nested translation mapping.
+    """
+    qs = (
+        TranslationValue.objects
+        .filter(translation_key__project=project)
+        .select_related("translation_key")
+        .order_by("translation_key__key")
     )
+
+    if language:
+        qs = qs.filter(language=language)
+        return {tv.translation_key.key: tv.value for tv in qs}
+
+    result = {}
+    for tv in qs:
+        result.setdefault(tv.language, {})[tv.translation_key.key] = tv.value
+    return result
