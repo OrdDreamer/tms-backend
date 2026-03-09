@@ -24,6 +24,8 @@ class UserLogoutAPIView(APIView):
     POST — blacklist refresh token (logout).
     """
 
+    permission_classes = []
+
     def post(self, request):
         serializer = UserLogoutInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
