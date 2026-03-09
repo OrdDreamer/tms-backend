@@ -1,5 +1,6 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
@@ -12,9 +13,22 @@ from apps.users.serializers import (
     UserDetailOutputSerializer,
     UserListFilterSerializer,
     UserListOutputSerializer,
+    UserLogoutInputSerializer,
     UserMeUpdateInputSerializer,
 )
-from apps.users.utils import user_change_password, user_update
+from apps.users.utils import user_change_password, user_logout, user_update
+
+
+class UserLogoutAPIView(APIView):
+    """
+    POST — blacklist refresh token (logout).
+    """
+
+    def post(self, request):
+        serializer = UserLogoutInputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user_logout(refresh_token=serializer.validated_data["refresh"])
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class UserListAPIView(APIView):

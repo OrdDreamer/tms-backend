@@ -1,6 +1,22 @@
 from django.contrib.auth.password_validation import validate_password
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.token_blacklist.models import (
+    BlacklistedToken,
+    OutstandingToken
+)
 
 from apps.users.models import User
+
+
+def _blacklist_all_tokens_for_user(*, user) -> None:
+    tokens = OutstandingToken.objects.filter(user=user)
+    for token in tokens:
+        BlacklistedToken.objects.get_or_create(token=token)
+
+
+def user_logout(*, refresh_token: str) -> None:
+    token = RefreshToken(refresh_token)  # type: ignore
+    token.blacklist()
 
 
 def user_create(*, email, password, **extra_fields):
@@ -36,6 +52,7 @@ def user_update(*, user, email=None, first_name=None, last_name=None):
 
 def user_change_password(*, user, new_password):
     validate_password(new_password, user)
+    _blacklist_all_tokens_for_user(user=user)
     user.set_password(new_password)
     user.save(update_fields=["password"])
     return user

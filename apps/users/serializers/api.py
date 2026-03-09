@@ -33,6 +33,10 @@ class UserMeUpdateInputSerializer(serializers.Serializer):
     last_name = serializers.CharField(required=False)
 
 
+class UserLogoutInputSerializer(serializers.Serializer):
+    refresh = serializers.CharField()
+
+
 class UserChangePasswordInputSerializer(serializers.Serializer):
     current_password = serializers.CharField(write_only=True)
     new_password = serializers.CharField(write_only=True, min_length=8)

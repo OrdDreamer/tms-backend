@@ -3,6 +3,7 @@ from apps.users.serializers.api import (
     UserDetailOutputSerializer,
     UserListFilterSerializer,
     UserListOutputSerializer,
+    UserLogoutInputSerializer,
     UserMeUpdateInputSerializer,
 )
 
@@ -11,5 +12,6 @@ __all__ = [
     "UserDetailOutputSerializer",
     "UserListFilterSerializer",
     "UserListOutputSerializer",
+    "UserLogoutInputSerializer",
     "UserMeUpdateInputSerializer",
 ]
