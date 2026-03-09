@@ -161,7 +161,7 @@ class ProjectLanguageDetailAPIView(APIView):
         serializer = ProjectLanguageUpdateInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        if serializer.validated_data["is_base_language"]:
+        if serializer.validated_data.get("is_base_language"):
             project_language = project_language_set_base(
                 project_language=project_language,
             )
