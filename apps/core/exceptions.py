@@ -31,3 +31,10 @@ class TranslationError(ApplicationError):
     Exception raised when a translation-related operation fails.
     """
     pass
+
+
+class AuthError(ApplicationError):
+    """
+    Exception raised when an authentication-related operation fails.
+    """
+    pass

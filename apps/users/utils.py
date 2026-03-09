@@ -1,10 +1,12 @@
 from django.contrib.auth.password_validation import validate_password
+from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.token_blacklist.models import (
     BlacklistedToken,
     OutstandingToken
 )
 
+from apps.core.exceptions import AuthError
 from apps.users.models import User
 
 
@@ -15,7 +17,10 @@ def _blacklist_all_tokens_for_user(*, user) -> None:
 
 
 def user_logout(*, refresh_token: str) -> None:
-    token = RefreshToken(refresh_token)  # type: ignore
+    try:
+        token = RefreshToken(refresh_token)  # type: ignore
+    except TokenError:
+        raise AuthError("Invalid or expired refresh token.")
     token.blacklist()
 
 
