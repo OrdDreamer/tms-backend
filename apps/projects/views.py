@@ -1,3 +1,4 @@
+from django.db.models import prefetch_related_objects
 from django.shortcuts import get_object_or_404
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema
@@ -28,8 +29,11 @@ from apps.projects.utils import (
 from apps.translations.utils import project_translations_export
 
 
-def _get_project(project_id):
-    return get_object_or_404(Project, id=project_id)
+def _get_project(project_id, prefetch=None):
+    qs = Project.objects.all()
+    if prefetch:
+        qs = qs.prefetch_related(*prefetch)
+    return get_object_or_404(qs, id=project_id)
 
 
 class ProjectListCreateAPIView(APIView):
@@ -61,6 +65,7 @@ class ProjectListCreateAPIView(APIView):
         serializer.is_valid(raise_exception=True)
 
         project = project_create(**serializer.validated_data)
+        prefetch_related_objects([project], "languages")
 
         output = ProjectDetailOutputSerializer(project)
         return Response(output.data, status=status.HTTP_201_CREATED)
@@ -73,7 +78,7 @@ class ProjectDetailAPIView(APIView):
         tags=["Projects"],
     )
     def get(self, request, project_id):
-        project = _get_project(project_id)
+        project = _get_project(project_id, prefetch=["languages"])
 
         serializer = ProjectDetailOutputSerializer(project)
         return Response(serializer.data)
@@ -85,7 +90,7 @@ class ProjectDetailAPIView(APIView):
         tags=["Projects"],
     )
     def patch(self, request, project_id):
-        project = _get_project(project_id)
+        project = _get_project(project_id, prefetch=["languages"])
 
         serializer = ProjectUpdateInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

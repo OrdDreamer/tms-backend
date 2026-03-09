@@ -4,6 +4,26 @@ from apps.core.choices import LanguageChoices
 
 
 # ----------------------
+# Project Language
+# ----------------------
+
+class ProjectLanguageCreateInputSerializer(serializers.Serializer):
+    language = serializers.ChoiceField(choices=LanguageChoices.choices)
+    is_base_language = serializers.BooleanField(default=False)
+
+
+class ProjectLanguageUpdateInputSerializer(serializers.Serializer):
+    is_base_language = serializers.BooleanField(required=False)
+
+
+class ProjectLanguageListOutputSerializer(serializers.Serializer):
+    id = serializers.UUIDField()  # noqa: VNE003
+    language = serializers.CharField()
+    is_base_language = serializers.BooleanField()
+    created_at = serializers.DateTimeField()
+
+
+# ----------------------
 # Project
 # ----------------------
 
@@ -35,26 +55,7 @@ class ProjectDetailOutputSerializer(serializers.Serializer):
     description = serializers.CharField()
     created_at = serializers.DateTimeField()
     updated_at = serializers.DateTimeField()
-
-
-# ----------------------
-# Project Language
-# ----------------------
-
-class ProjectLanguageCreateInputSerializer(serializers.Serializer):
-    language = serializers.ChoiceField(choices=LanguageChoices.choices)
-    is_base_language = serializers.BooleanField(default=False)
-
-
-class ProjectLanguageUpdateInputSerializer(serializers.Serializer):
-    is_base_language = serializers.BooleanField(required=False)
-
-
-class ProjectLanguageListOutputSerializer(serializers.Serializer):
-    id = serializers.UUIDField()  # noqa: VNE003
-    language = serializers.CharField()
-    is_base_language = serializers.BooleanField()
-    created_at = serializers.DateTimeField()
+    languages = ProjectLanguageListOutputSerializer(many=True)
 
 
 # ----------------------

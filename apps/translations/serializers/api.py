@@ -21,7 +21,11 @@ class TranslationKeyListFilterSerializer(serializers.Serializer):
 
 class TranslationKeyCreateInputSerializer(serializers.Serializer):
     key = serializers.CharField(max_length=255)
-    description = serializers.CharField(required=False, default="")
+    description = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        default=""
+    )
     translations = serializers.DictField(
         child=serializers.CharField(),
         required=False,
