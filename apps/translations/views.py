@@ -1,5 +1,6 @@
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
@@ -10,6 +11,7 @@ from apps.translations.models import TranslationKey, TranslationValue
 from apps.translations.serializers import (
     TranslationBulkUpdateInputSerializer,
     TranslationKeyBulkDeleteInputSerializer,
+    TranslationKeyBulkDeleteOutputSerializer,
     TranslationKeyCreateInputSerializer,
     TranslationKeyDetailOutputSerializer,
     TranslationKeyListFilterSerializer,
@@ -58,6 +60,31 @@ class TranslationKeyListCreateAPIView(APIView):
         default_limit = 20
         max_limit = 100
 
+    @extend_schema(
+        summary="List translation keys",
+        parameters=[
+            OpenApiParameter(
+                name="search",
+                description="Filter by key name",
+                required=False,
+                type=str,
+            ),
+            OpenApiParameter(
+                name="lang",
+                description="Filter by language code",
+                required=False,
+                type=str,
+            ),
+            OpenApiParameter(
+                name="untranslated",
+                description="Return only keys without a translation for the given lang",
+                required=False,
+                type=bool,
+            ),
+        ],
+        responses=TranslationKeyListOutputSerializer(many=True),
+        tags=["Translation Keys"],
+    )
     def get(self, request, project_id):
         project = _get_project(project_id)
         project_languages = _get_project_languages(project)
@@ -96,6 +123,12 @@ class TranslationKeyListCreateAPIView(APIView):
         )
         return paginator.get_paginated_response(serializer.data)
 
+    @extend_schema(
+        summary="Create a translation key",
+        request=TranslationKeyCreateInputSerializer,
+        responses={201: TranslationKeyDetailOutputSerializer},
+        tags=["Translation Keys"],
+    )
     def post(self, request, project_id):
         project = _get_project(project_id)
         project_languages = _get_project_languages(project)
@@ -131,6 +164,11 @@ class TranslationKeyListCreateAPIView(APIView):
 
 
 class TranslationKeyDetailAPIView(APIView):
+    @extend_schema(
+        summary="Retrieve a translation key",
+        responses=TranslationKeyDetailOutputSerializer,
+        tags=["Translation Keys"],
+    )
     def get(self, request, project_id, key_id):
         tk = _get_translation_key(project_id, key_id)
         project_languages = _get_project_languages(tk.project)
@@ -140,6 +178,12 @@ class TranslationKeyDetailAPIView(APIView):
         )
         return Response(output.data)
 
+    @extend_schema(
+        summary="Update a translation key",
+        request=TranslationKeyUpdateInputSerializer,
+        responses=TranslationKeyDetailOutputSerializer,
+        tags=["Translation Keys"],
+    )
     def patch(self, request, project_id, key_id):
         tk = _get_translation_key(project_id, key_id)
         project_languages = _get_project_languages(tk.project)
@@ -156,6 +200,11 @@ class TranslationKeyDetailAPIView(APIView):
         )
         return Response(output.data)
 
+    @extend_schema(
+        summary="Delete a translation key",
+        responses={204: None},
+        tags=["Translation Keys"],
+    )
     def delete(self, request, project_id, key_id):
         tk = _get_translation_key(project_id, key_id)
         translation_key_delete(translation_key=tk)
@@ -163,6 +212,12 @@ class TranslationKeyDetailAPIView(APIView):
 
 
 class TranslationKeyBulkDeleteAPIView(APIView):
+    @extend_schema(
+        summary="Bulk delete translation keys",
+        request=TranslationKeyBulkDeleteInputSerializer,
+        responses=TranslationKeyBulkDeleteOutputSerializer,
+        tags=["Translation Keys"],
+    )
     def post(self, request, project_id):
         project = _get_project(project_id)
 
@@ -181,11 +236,11 @@ class TranslationKeyBulkDeleteAPIView(APIView):
 
 
 class TranslationListAPIView(APIView):
-    """
-    GET  — list all translations for a key.
-    PATCH — batch create/update translations for a key.
-    """
-
+    @extend_schema(
+        summary="List translations for a key",
+        responses=TranslationValueOutputSerializer(many=True),
+        tags=["Translations"],
+    )
     def get(self, request, project_id, key_id):
         tk = _get_translation_key(project_id, key_id)
 
@@ -193,6 +248,12 @@ class TranslationListAPIView(APIView):
         serializer = TranslationValueOutputSerializer(values, many=True)
         return Response(serializer.data)
 
+    @extend_schema(
+        summary="Batch create/update translations for a key",
+        request=TranslationBulkUpdateInputSerializer,
+        responses=TranslationValueOutputSerializer(many=True),
+        tags=["Translations"],
+    )
     def patch(self, request, project_id, key_id):
         tk = _get_translation_key(project_id, key_id)
         project_languages = _get_project_languages(tk.project)
@@ -220,11 +281,12 @@ class TranslationListAPIView(APIView):
 
 
 class TranslationDetailAPIView(APIView):
-    """
-    PUT    — idempotent create-or-replace a single translation.
-    DELETE — remove a single translation.
-    """
-
+    @extend_schema(
+        summary="Create or replace a single translation",
+        request=TranslationValueCreateInputSerializer,
+        responses=TranslationValueOutputSerializer,
+        tags=["Translations"],
+    )
     def put(self, request, project_id, key_id, lang_code):
         tk = _get_translation_key(project_id, key_id)
 
@@ -251,6 +313,11 @@ class TranslationDetailAPIView(APIView):
         output = TranslationValueOutputSerializer(tv)
         return Response(output.data, status=status.HTTP_201_CREATED)
 
+    @extend_schema(
+        summary="Remove a single translation",
+        responses={204: None},
+        tags=["Translations"],
+    )
     def delete(self, request, project_id, key_id, lang_code):
         tv = get_object_or_404(
             TranslationValue,

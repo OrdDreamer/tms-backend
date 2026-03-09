@@ -1,5 +1,6 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import LimitOffsetPagination
@@ -10,6 +11,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from apps.users.models import User
 from apps.users.serializers import (
     UserChangePasswordInputSerializer,
+    UserChangePasswordOutputSerializer,
     UserDetailOutputSerializer,
     UserListFilterSerializer,
     UserListOutputSerializer,
@@ -20,12 +22,14 @@ from apps.users.utils import user_change_password, user_logout, user_update
 
 
 class UserLogoutAPIView(APIView):
-    """
-    POST — blacklist refresh token (logout).
-    """
-
     permission_classes = []
 
+    @extend_schema(
+        summary="Logout (blacklist refresh token)",
+        request=UserLogoutInputSerializer,
+        responses={204: None},
+        tags=["Auth"],
+    )
     def post(self, request):
         serializer = UserLogoutInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -34,14 +38,23 @@ class UserLogoutAPIView(APIView):
 
 
 class UserListAPIView(APIView):
-    """
-    GET — list users (read-only, paginated).
-    """
-
     class Pagination(LimitOffsetPagination):
         default_limit = 20
         max_limit = 100
 
+    @extend_schema(
+        summary="List users",
+        parameters=[
+            OpenApiParameter(
+                name="search",
+                description="Filter by email, first name or last name",
+                required=False,
+                type=str,
+            )
+        ],
+        responses=UserListOutputSerializer(many=True),
+        tags=["Users"],
+    )
     def get(self, request):
         filters = UserListFilterSerializer(data=request.query_params)
         filters.is_valid(raise_exception=True)
@@ -63,10 +76,11 @@ class UserListAPIView(APIView):
 
 
 class UserDetailAPIView(APIView):
-    """
-    GET — retrieve user details by id.
-    """
-
+    @extend_schema(
+        summary="Retrieve user details",
+        responses=UserDetailOutputSerializer,
+        tags=["Users"],
+    )
     def get(self, request, user_id):
         user = get_object_or_404(User, id=user_id)
         serializer = UserDetailOutputSerializer(user)
@@ -74,10 +88,12 @@ class UserDetailAPIView(APIView):
 
 
 class UserChangePasswordAPIView(APIView):
-    """
-    POST — change current user password and return new access/refresh tokens.
-    """
-
+    @extend_schema(
+        summary="Change current user password",
+        request=UserChangePasswordInputSerializer,
+        responses=UserChangePasswordOutputSerializer,
+        tags=["Users"],
+    )
     def post(self, request):
         serializer = UserChangePasswordInputSerializer(
             data=request.data,
@@ -97,15 +113,21 @@ class UserChangePasswordAPIView(APIView):
 
 
 class UserMeAPIView(APIView):
-    """
-    GET   — get current user profile.
-    PATCH — update current user profile.
-    """
-
+    @extend_schema(
+        summary="Get current user profile",
+        responses=UserDetailOutputSerializer,
+        tags=["Users"],
+    )
     def get(self, request):
         serializer = UserDetailOutputSerializer(request.user)
         return Response(serializer.data)
 
+    @extend_schema(
+        summary="Update current user profile",
+        request=UserMeUpdateInputSerializer,
+        responses=UserDetailOutputSerializer,
+        tags=["Users"],
+    )
     def patch(self, request):
         serializer = UserMeUpdateInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

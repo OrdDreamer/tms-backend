@@ -1,4 +1,6 @@
 from django.shortcuts import get_object_or_404
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
@@ -31,15 +33,15 @@ def _get_project(project_id):
 
 
 class ProjectListCreateAPIView(APIView):
-    """
-    GET  — list projects.
-    POST — create a project.
-    """
-
     class Pagination(LimitOffsetPagination):
         default_limit = 20
         max_limit = 100
 
+    @extend_schema(
+        summary="List projects",
+        responses=ProjectListOutputSerializer(many=True),
+        tags=["Projects"],
+    )
     def get(self, request):
         projects = Project.objects.all()
 
@@ -48,6 +50,12 @@ class ProjectListCreateAPIView(APIView):
         serializer = ProjectListOutputSerializer(page, many=True)
         return paginator.get_paginated_response(serializer.data)
 
+    @extend_schema(
+        summary="Create a project",
+        request=ProjectCreateInputSerializer,
+        responses={201: ProjectDetailOutputSerializer},
+        tags=["Projects"],
+    )
     def post(self, request):
         serializer = ProjectCreateInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -59,18 +67,23 @@ class ProjectListCreateAPIView(APIView):
 
 
 class ProjectDetailAPIView(APIView):
-    """
-    GET    — retrieve a project.
-    PATCH  — update a project.
-    DELETE — delete a project.
-    """
-
+    @extend_schema(
+        summary="Retrieve a project",
+        responses=ProjectDetailOutputSerializer,
+        tags=["Projects"],
+    )
     def get(self, request, project_id):
         project = _get_project(project_id)
 
         serializer = ProjectDetailOutputSerializer(project)
         return Response(serializer.data)
 
+    @extend_schema(
+        summary="Update a project",
+        request=ProjectUpdateInputSerializer,
+        responses=ProjectDetailOutputSerializer,
+        tags=["Projects"],
+    )
     def patch(self, request, project_id):
         project = _get_project(project_id)
 
@@ -82,6 +95,11 @@ class ProjectDetailAPIView(APIView):
         output = ProjectDetailOutputSerializer(project)
         return Response(output.data)
 
+    @extend_schema(
+        summary="Delete a project",
+        responses={204: None},
+        tags=["Projects"],
+    )
     def delete(self, request, project_id):
         project = _get_project(project_id)
         project_delete(project=project)
@@ -89,11 +107,11 @@ class ProjectDetailAPIView(APIView):
 
 
 class ProjectLanguageListCreateAPIView(APIView):
-    """
-    GET  — list project languages.
-    POST — add a language to a project.
-    """
-
+    @extend_schema(
+        summary="List project languages",
+        responses=ProjectLanguageListOutputSerializer(many=True),
+        tags=["Project Languages"],
+    )
     def get(self, request, project_id):
         project = _get_project(project_id)
 
@@ -101,6 +119,12 @@ class ProjectLanguageListCreateAPIView(APIView):
         serializer = ProjectLanguageListOutputSerializer(languages, many=True)
         return Response(serializer.data)
 
+    @extend_schema(
+        summary="Add a language to a project",
+        request=ProjectLanguageCreateInputSerializer,
+        responses={201: ProjectLanguageListOutputSerializer},
+        tags=["Project Languages"],
+    )
     def post(self, request, project_id):
         project = _get_project(project_id)
 
@@ -116,11 +140,12 @@ class ProjectLanguageListCreateAPIView(APIView):
 
 
 class ProjectLanguageDetailAPIView(APIView):
-    """
-    PATCH  — update a project language.
-    DELETE — remove a project language.
-    """
-
+    @extend_schema(
+        summary="Update a project language",
+        request=ProjectLanguageUpdateInputSerializer,
+        responses=ProjectLanguageListOutputSerializer,
+        tags=["Project Languages"],
+    )
     def patch(self, request, project_id, lang_code):
         project_language = get_object_or_404(
             ProjectLanguage,
@@ -139,6 +164,11 @@ class ProjectLanguageDetailAPIView(APIView):
         output = ProjectLanguageListOutputSerializer(project_language)
         return Response(output.data)
 
+    @extend_schema(
+        summary="Remove a project language",
+        responses={204: None},
+        tags=["Project Languages"],
+    )
     def delete(self, request, project_id, lang_code):
         project_language = get_object_or_404(
             ProjectLanguage,
@@ -150,10 +180,11 @@ class ProjectLanguageDetailAPIView(APIView):
 
 
 class ProjectExportAPIView(APIView):
-    """
-    GET — export project translations (optionally filtered by language).
-    """
-
+    @extend_schema(
+        summary="Export project translations",
+        responses={(200, "application/json"): OpenApiTypes.OBJECT},
+        tags=["Projects"],
+    )
     def get(self, request, project_id):
         project = _get_project(project_id)
 

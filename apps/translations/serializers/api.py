@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 
@@ -41,6 +42,7 @@ class TranslationKeyListOutputSerializer(serializers.Serializer):
     created_at = serializers.DateTimeField()
     updated_at = serializers.DateTimeField()
 
+    @extend_schema_field(serializers.DictField(child=serializers.CharField()))
     def get_translations(self, obj):
         return _translations_dict(obj, self.context.get("project_languages"))
 
@@ -53,6 +55,7 @@ class TranslationKeyDetailOutputSerializer(serializers.Serializer):
     created_at = serializers.DateTimeField()
     updated_at = serializers.DateTimeField()
 
+    @extend_schema_field(serializers.DictField(child=serializers.CharField()))
     def get_translations(self, obj):
         return _translations_dict(obj, self.context.get("project_languages"))
 
@@ -83,3 +86,7 @@ class TranslationBulkUpdateInputSerializer(serializers.Serializer):
     translations = serializers.DictField(
         child=serializers.CharField(),
     )
+
+
+class TranslationKeyBulkDeleteOutputSerializer(serializers.Serializer):
+    deleted_count = serializers.IntegerField()

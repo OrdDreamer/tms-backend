@@ -1,6 +1,7 @@
 from apps.translations.serializers.api import (
     TranslationBulkUpdateInputSerializer,
     TranslationKeyBulkDeleteInputSerializer,
+    TranslationKeyBulkDeleteOutputSerializer,
     TranslationKeyCreateInputSerializer,
     TranslationKeyDetailOutputSerializer,
     TranslationKeyListFilterSerializer,
@@ -13,6 +14,7 @@ from apps.translations.serializers.api import (
 __all__ = [
     "TranslationBulkUpdateInputSerializer",
     "TranslationKeyBulkDeleteInputSerializer",
+    "TranslationKeyBulkDeleteOutputSerializer",
     "TranslationKeyCreateInputSerializer",
     "TranslationKeyDetailOutputSerializer",
     "TranslationKeyListFilterSerializer",

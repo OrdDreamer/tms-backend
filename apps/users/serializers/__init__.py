@@ -1,5 +1,6 @@
 from apps.users.serializers.api import (
     UserChangePasswordInputSerializer,
+    UserChangePasswordOutputSerializer,
     UserDetailOutputSerializer,
     UserListFilterSerializer,
     UserListOutputSerializer,
@@ -9,6 +10,7 @@ from apps.users.serializers.api import (
 
 __all__ = [
     "UserChangePasswordInputSerializer",
+    "UserChangePasswordOutputSerializer",
     "UserDetailOutputSerializer",
     "UserListFilterSerializer",
     "UserListOutputSerializer",
