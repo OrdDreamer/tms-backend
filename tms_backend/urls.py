@@ -20,4 +20,5 @@ urlpatterns = [
         name="token-refresh"
     ),
     path("api/v1/projects/", include("apps.projects.urls")),
+    path("api/v1/users/", include("apps.users.urls")),
 ]

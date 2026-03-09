@@ -27,12 +27,13 @@ from apps.translations.utils import project_translations_export
 
 
 def _get_project(project_id):
-    return _get_project(project_id)
+    return get_object_or_404(Project, id=project_id)
 
 
 class ProjectListCreateAPIView(APIView):
     """
-    List projects (GET) and create a project (POST).
+    GET  — list projects.
+    POST — create a project.
     """
 
     class Pagination(LimitOffsetPagination):
@@ -59,7 +60,9 @@ class ProjectListCreateAPIView(APIView):
 
 class ProjectDetailAPIView(APIView):
     """
-    Retrieve (GET), update (PATCH), and delete (DELETE) a project.
+    GET    — retrieve a project.
+    PATCH  — update a project.
+    DELETE — delete a project.
     """
 
     def get(self, request, project_id):
@@ -87,7 +90,8 @@ class ProjectDetailAPIView(APIView):
 
 class ProjectLanguageListCreateAPIView(APIView):
     """
-    List project languages (GET) and add a language (POST).
+    GET  — list project languages.
+    POST — add a language to a project.
     """
 
     def get(self, request, project_id):
@@ -113,7 +117,8 @@ class ProjectLanguageListCreateAPIView(APIView):
 
 class ProjectLanguageDetailAPIView(APIView):
     """
-    Update (PATCH) and remove (DELETE) a project language.
+    PATCH  — update a project language.
+    DELETE — remove a project language.
     """
 
     def patch(self, request, project_id, lang_code):
@@ -146,7 +151,7 @@ class ProjectLanguageDetailAPIView(APIView):
 
 class ProjectExportAPIView(APIView):
     """
-    Export project translations (optionally filtered by language).
+    GET — export project translations (optionally filtered by language).
     """
 
     def get(self, request, project_id):

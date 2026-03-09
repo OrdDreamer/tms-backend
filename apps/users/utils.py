@@ -1,3 +1,5 @@
+from django.contrib.auth.password_validation import validate_password
+
 from apps.users.models import User
 
 
@@ -28,5 +30,12 @@ def user_update(*, user, email=None, first_name=None, last_name=None):
         return user
 
     user.full_clean()
-    user.save(update_fields=[*update_fields, "updated_at"])
+    user.save(update_fields=update_fields)
+    return user
+
+
+def user_change_password(*, user, new_password):
+    validate_password(new_password, user)
+    user.set_password(new_password)
+    user.save(update_fields=["password"])
     return user
