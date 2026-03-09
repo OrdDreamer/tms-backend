@@ -13,6 +13,7 @@ class UserAdmin(BaseUserAdmin):
     Provides search by email and name fields.
     """
     list_display = (
+        "id",
         "email",
         "first_name",
         "last_name",
