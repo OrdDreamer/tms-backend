@@ -40,12 +40,9 @@ class TranslationKeyUpdateInputSerializer(serializers.Serializer):
 
 
 class TranslationKeyListOutputSerializer(serializers.Serializer):
-    id = serializers.UUIDField()  # noqa: VNE003
     key = serializers.CharField()
     description = serializers.CharField()
     translations = serializers.SerializerMethodField()
-    created_at = serializers.DateTimeField()
-    updated_at = serializers.DateTimeField()
 
     @extend_schema_field(serializers.DictField(child=serializers.CharField()))
     def get_translations(self, obj):
