@@ -302,13 +302,19 @@ class TranslationDetailAPIView(APIView):
                 translation_value=existing,
                 value=serializer.validated_data["value"],
             )
+            if tv is None:
+                return Response(status=status.HTTP_204_NO_CONTENT)
             output = TranslationValueOutputSerializer(tv)
             return Response(output.data)
+
+        value = serializer.validated_data["value"]
+        if not value:
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
         tv = translation_value_create(
             translation_key=tk,
             language=lang_code,
-            value=serializer.validated_data["value"],
+            value=value,
         )
         output = TranslationValueOutputSerializer(tv)
         return Response(output.data, status=status.HTTP_201_CREATED)

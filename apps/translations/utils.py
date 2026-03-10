@@ -184,13 +184,20 @@ def translation_value_update(*, translation_value, value):
     """
     Update the translated text of an existing translation value.
 
+    If value is empty, the record is deleted and None is returned.
+
     Args:
         translation_value: TranslationValue — instance to update.
         value: str — new translated text.
 
     Returns:
-        TranslationValue — updated instance.
+        TranslationValue | None — updated instance, or None if value
+        was blank (record deleted).
     """
+    if not value:
+        translation_value.delete()
+        return None
+
     translation_value.value = value
     translation_value.full_clean()
     translation_value.save(update_fields=["value", "updated_at"])
@@ -210,10 +217,13 @@ def translation_value_delete(*, translation_value):
 @transaction.atomic
 def translation_value_bulk_update(*, translation_key, values_data):
     """
-    Bulk create or update translation values for a given key.
+    Bulk create, update, or delete translation values for a given key.
 
-    For each item in values_data: if a TranslationValue already exists for
-    that (translation_key, language) — update it; otherwise — create a new one.
+    For each item in values_data:
+    - Existing record + non-empty value → update.
+    - Existing record + empty value → delete.
+    - No record + non-empty value → create.
+    - No record + empty value → skip.
 
     Args:
         translation_key: TranslationKey — parent key.
@@ -223,7 +233,8 @@ def translation_value_bulk_update(*, translation_key, values_data):
 
     Returns:
         dict — {"created": list[TranslationValue],
-                 "updated": list[TranslationValue]}.
+                 "updated": list[TranslationValue],
+                 "deleted_count": int}.
 
     Raises:
         TranslationError — if any language is not configured for the project.
@@ -253,21 +264,26 @@ def translation_value_bulk_update(*, translation_key, values_data):
 
     to_create = []
     to_update = []
+    to_delete_ids = []
 
     for item in values_data:
         language = item["language"]
         value = item["value"]
 
         if language in existing:
-            tv = existing[language]
-            tv.value = value
-            to_update.append(tv)
+            if value:
+                tv = existing[language]
+                tv.value = value
+                to_update.append(tv)
+            else:
+                to_delete_ids.append(existing[language].id)
         else:
-            to_create.append(TranslationValue(
-                translation_key=translation_key,
-                language=language,
-                value=value,
-            ))
+            if value:
+                to_create.append(TranslationValue(
+                    translation_key=translation_key,
+                    language=language,
+                    value=value,
+                ))
 
     created = []
     if to_create:
@@ -279,7 +295,17 @@ def translation_value_bulk_update(*, translation_key, values_data):
             ["value", "updated_at"]
         )
 
-    return {"created": created, "updated": to_update}
+    deleted_count = 0
+    if to_delete_ids:
+        deleted_count, _ = TranslationValue.objects.filter(
+            id__in=to_delete_ids,
+        ).delete()
+
+    return {
+        "created": created,
+        "updated": to_update,
+        "deleted_count": deleted_count,
+    }
 
 
 @transaction.atomic

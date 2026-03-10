@@ -27,7 +27,7 @@ class TranslationKeyCreateInputSerializer(serializers.Serializer):
         default=""
     )
     translations = serializers.DictField(
-        child=serializers.CharField(),
+        child=serializers.CharField(allow_blank=True),
         required=False,
         default=dict,
     )
@@ -83,12 +83,12 @@ class TranslationValueOutputSerializer(serializers.Serializer):
 
 
 class TranslationValueCreateInputSerializer(serializers.Serializer):
-    value = serializers.CharField()
+    value = serializers.CharField(allow_blank=True)
 
 
 class TranslationBulkUpdateInputSerializer(serializers.Serializer):
     translations = serializers.DictField(
-        child=serializers.CharField(),
+        child=serializers.CharField(allow_blank=True),
     )
 
 
