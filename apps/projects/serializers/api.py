@@ -67,3 +67,8 @@ class ProjectExportFilterSerializer(serializers.Serializer):
         choices=LanguageChoices.choices,
         required=False,
     )
+    export_format = serializers.ChoiceField(
+        choices=[("flat", "Flat"), ("nested", "Nested")],
+        default="flat",
+        required=False,
+    )

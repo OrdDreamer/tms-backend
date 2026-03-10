@@ -27,6 +27,44 @@ def _validate_language_belongs_to_project(*, translation_key, language):
         )
 
 
+def _validate_key_no_nesting_conflict(*, project, key, exclude_id=None):
+    """
+    Ensure that a key does not conflict with existing keys in a
+    parent-child relationship.
+
+    For example, ``menu`` and ``menu.file`` cannot coexist because
+    ``menu`` would be both a leaf value and a namespace for nested keys.
+
+    ``exclude_id`` is needed when renaming a key — the old record is
+    still in the DB and would falsely conflict with the new name
+    (e.g. renaming ``menu`` to ``menu.key``).
+
+    Raises:
+        TranslationError — if the key conflicts with an existing
+        parent or child key.
+    """
+    qs = TranslationKey.objects.filter(project=project)
+    if exclude_id:
+        qs = qs.exclude(id=exclude_id)
+
+    parts = key.split(".")
+    ancestor_keys = [".".join(parts[:i]) for i in range(1, len(parts))]
+    if ancestor_keys:
+        conflicts = list(qs.filter(key__in=ancestor_keys).values_list("key", flat=True))
+        if conflicts:
+            raise TranslationError(
+                f"Key '{key}' conflicts with an existing parent key.",
+                extra={"key": key, "conflicting_keys": conflicts},
+            )
+
+    conflicts = list(qs.filter(key__startswith=f"{key}.").values_list("key", flat=True))
+    if conflicts:
+        raise TranslationError(
+            f"Key '{key}' conflicts with existing nested keys.",
+            extra={"key": key, "conflicting_keys": conflicts},
+        )
+
+
 def translation_key_create(*, project, key, description=""):
     """
     Create a new translation key for a project.
@@ -44,6 +82,7 @@ def translation_key_create(*, project, key, description=""):
             or (key, project) pair already exists.
     """
     key = key.lower()
+    _validate_key_no_nesting_conflict(project=project, key=key)
 
     translation_key = TranslationKey(
         project=project,
@@ -76,6 +115,11 @@ def translation_key_update(*, translation_key, key=None, description=None):
     update_fields = []
 
     if key is not None:
+        _validate_key_no_nesting_conflict(
+            project=translation_key.project,
+            key=key.lower(),
+            exclude_id=translation_key.id,
+        )
         translation_key.key = key.lower()
         update_fields.append("key")
 
@@ -307,32 +351,84 @@ def translation_key_bulk_delete(*, project, key_ids):
     return deleted_count
 
 
-def project_translations_export(*, project, language=None):
+def project_translations_export(*, project, language=None, export_format="flat"):
     """
     Export translations for a project.
 
-    Single language returns a flat dict: {"key": "value"}.
-    All languages returns a nested dict: {"lang": {"key": "value"}}.
+    Builds a full matrix of all project keys x target languages.
+    Missing translations are represented as empty strings.
 
     Args:
         project: Project — project to export.
         language: str | None — if set, export only this language.
+        export_format: "flat" | "nested" — output structure.
+            "flat": dot-separated keys as-is.
+            "nested": dots in keys produce nested dicts.
+            Key nesting conflicts (e.g. "menu" and "menu.file") are
+            prevented by validation at creation time. As a fallback,
+            if such a conflict exists, the leaf value is replaced by
+            the nested dict.
 
     Returns:
-        dict — flat or nested translation mapping.
+        dict — when language is set, returns a single language mapping;
+               otherwise, returns {lang_code: mapping} for every project language.
+
+    Raises:
+        TranslationError — if language is not configured for the project.
     """
-    qs = (
-        TranslationValue.objects
-        .filter(translation_key__project=project)
-        .select_related("translation_key")
-        .order_by("translation_key__key")
+    project_langs = list(
+        project.languages.values_list("language", flat=True)
     )
 
     if language:
-        qs = qs.filter(language=language)
-        return {tv.translation_key.key: tv.value for tv in qs}
+        if language not in project_langs:
+            raise TranslationError(
+                f"Language '{language}' is not configured for project "
+                f"'{project.slug}'.",
+                extra={"language": language},
+            )
+        target_langs = [language]
+    else:
+        target_langs = sorted(project_langs)
 
-    result = {}
-    for tv in qs:
-        result.setdefault(tv.language, {})[tv.translation_key.key] = tv.value
-    return result
+    all_keys = list(
+        TranslationKey.objects
+        .filter(project=project)
+        .order_by("key")
+        .values_list("key", flat=True)
+    )
+
+    existing = (
+        TranslationValue.objects
+        .filter(
+            translation_key__project=project,
+            language__in=target_langs,
+        )
+        .select_related("translation_key")
+    )
+
+    value_map = {}
+    for tv in existing:
+        value_map[(tv.language, tv.translation_key.key)] = tv.value
+
+    def _build_flat(lang):
+        return {key: value_map.get((lang, key), "") for key in all_keys}
+
+    def _build_nested(lang):
+        tree = {}
+        for key in all_keys:
+            parts = key.split(".")
+            node = tree
+            for part in parts[:-1]:
+                if part not in node or not isinstance(node[part], dict):
+                    node[part] = {}
+                node = node[part]
+            node[parts[-1]] = value_map.get((lang, key), "")
+        return tree
+
+    builder = _build_nested if export_format == "nested" else _build_flat
+
+    if language:
+        return builder(language)
+
+    return {lang: builder(lang) for lang in target_langs}

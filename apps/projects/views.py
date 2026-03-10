@@ -191,13 +191,16 @@ class ProjectExportAPIView(APIView):
         tags=["Projects"],
     )
     def get(self, request, project_id):
-        project = _get_project(project_id)
+        project = _get_project(project_id, prefetch=["languages"])
 
         serializer = ProjectExportFilterSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
 
         language = serializer.validated_data.get("lang")
+        export_format = serializer.validated_data.get("export_format", "flat")
         data = project_translations_export(
-            project=project, language=language,
+            project=project,
+            language=language,
+            export_format=export_format,
         )
         return Response(data)
