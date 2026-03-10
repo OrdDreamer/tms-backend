@@ -17,6 +17,7 @@ class TranslationKeyListFilterSerializer(serializers.Serializer):
     search = serializers.CharField(required=False)
     lang = serializers.CharField(required=False)
     untranslated = serializers.BooleanField(required=False, default=False)
+    include_translations = serializers.BooleanField(required=False, default=True)
 
 
 class TranslationKeyCreateInputSerializer(serializers.Serializer):
@@ -48,7 +49,15 @@ class TranslationKeyListOutputSerializer(serializers.Serializer):
 
     @extend_schema_field(serializers.DictField(child=serializers.CharField()))
     def get_translations(self, obj):
+        if not self.context.get("include_translations", True):
+            return None
         return _translations_dict(obj, self.context.get("project_languages"))
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if not self.context.get("include_translations", True):
+            data.pop("translations", None)
+        return data
 
 
 class TranslationKeyDetailOutputSerializer(serializers.Serializer):

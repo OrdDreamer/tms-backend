@@ -81,6 +81,12 @@ class TranslationKeyListCreateAPIView(APIView):
                 required=False,
                 type=bool,
             ),
+            OpenApiParameter(
+                name="include_translations",
+                description="Include translations in the response (default true)",
+                required=False,
+                type=bool,
+            ),
         ],
         responses=TranslationKeyListOutputSerializer(many=True),
         tags=["Translation Keys"],
@@ -94,9 +100,13 @@ class TranslationKeyListCreateAPIView(APIView):
         )
         filters.is_valid(raise_exception=True)
 
-        qs = TranslationKey.objects.filter(
-            project=project,
-        ).prefetch_related("values")
+        include_translations = filters.validated_data.get(
+            "include_translations", True,
+        )
+
+        qs = TranslationKey.objects.filter(project=project)
+        if include_translations:
+            qs = qs.prefetch_related("values")
 
         search = filters.validated_data.get("search")
         if search:
@@ -119,7 +129,10 @@ class TranslationKeyListCreateAPIView(APIView):
 
         serializer = TranslationKeyListOutputSerializer(
             page, many=True,
-            context={"project_languages": project_languages},
+            context={
+                "project_languages": project_languages,
+                "include_translations": include_translations,
+            },
         )
         return paginator.get_paginated_response(serializer.data)
 
