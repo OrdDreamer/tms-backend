@@ -356,23 +356,23 @@ def translation_key_create_with_values(
     return result
 
 
-def translation_key_bulk_delete(*, project, key_ids):
+def translation_key_bulk_delete(*, project, key_names):
     """
-    Delete multiple translation keys by IDs within a project.
+    Delete multiple translation keys by name within a project.
 
-    Only keys belonging to the given project are deleted; IDs from other
-    projects are silently ignored.
+    Only keys belonging to the given project are deleted; names not found
+    are silently ignored.
 
     Args:
         project: Project — project the keys belong to.
-        key_ids: list[UUID] — IDs of the keys to delete.
+        key_names: list[str] — key identifiers to delete.
 
     Returns:
         int — number of keys actually deleted.
     """
     deleted_count, _ = TranslationKey.objects.filter(
         project=project,
-        id__in=key_ids,
+        key__in=key_names,
     ).delete()
     return deleted_count
 

@@ -22,17 +22,17 @@ urlpatterns = [
         name="translation-key-bulk-delete",
     ),
     path(
-        "<uuid:key_id>/",
+        "<str:key_name>/",
         TranslationKeyDetailAPIView.as_view(),
         name="translation-key-detail",
     ),
     path(
-        "<uuid:key_id>/translations/",
+        "<str:key_name>/translations/",
         TranslationListAPIView.as_view(),
         name="translation-list",
     ),
     path(
-        "<uuid:key_id>/translations/<str:lang_code>/",
+        "<str:key_name>/translations/<str:lang_code>/",
         TranslationDetailAPIView.as_view(),
         name="translation-detail",
     ),

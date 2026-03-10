@@ -29,11 +29,11 @@ from apps.projects.utils import (
 from apps.translations.utils import project_translations_export
 
 
-def _get_project(project_id, prefetch=None):
+def _get_project(project_slug, prefetch=None):
     qs = Project.objects.all()
     if prefetch:
         qs = qs.prefetch_related(*prefetch)
-    return get_object_or_404(qs, id=project_id)
+    return get_object_or_404(qs, slug=project_slug)
 
 
 class ProjectListCreateAPIView(APIView):
@@ -77,8 +77,8 @@ class ProjectDetailAPIView(APIView):
         responses=ProjectDetailOutputSerializer,
         tags=["Projects"],
     )
-    def get(self, request, project_id):
-        project = _get_project(project_id, prefetch=["languages"])
+    def get(self, request, project_slug):
+        project = _get_project(project_slug, prefetch=["languages"])
 
         serializer = ProjectDetailOutputSerializer(project)
         return Response(serializer.data)
@@ -89,8 +89,8 @@ class ProjectDetailAPIView(APIView):
         responses=ProjectDetailOutputSerializer,
         tags=["Projects"],
     )
-    def patch(self, request, project_id):
-        project = _get_project(project_id, prefetch=["languages"])
+    def patch(self, request, project_slug):
+        project = _get_project(project_slug, prefetch=["languages"])
 
         serializer = ProjectUpdateInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -105,8 +105,8 @@ class ProjectDetailAPIView(APIView):
         responses={204: None},
         tags=["Projects"],
     )
-    def delete(self, request, project_id):
-        project = _get_project(project_id)
+    def delete(self, request, project_slug):
+        project = _get_project(project_slug)
         project_delete(project=project)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -117,8 +117,8 @@ class ProjectLanguageListCreateAPIView(APIView):
         responses=ProjectLanguageListOutputSerializer(many=True),
         tags=["Project Languages"],
     )
-    def get(self, request, project_id):
-        project = _get_project(project_id)
+    def get(self, request, project_slug):
+        project = _get_project(project_slug)
 
         languages = ProjectLanguage.objects.filter(project=project)
         serializer = ProjectLanguageListOutputSerializer(languages, many=True)
@@ -130,8 +130,8 @@ class ProjectLanguageListCreateAPIView(APIView):
         responses={201: ProjectLanguageListOutputSerializer},
         tags=["Project Languages"],
     )
-    def post(self, request, project_id):
-        project = _get_project(project_id)
+    def post(self, request, project_slug):
+        project = _get_project(project_slug)
 
         serializer = ProjectLanguageCreateInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -151,10 +151,10 @@ class ProjectLanguageDetailAPIView(APIView):
         responses=ProjectLanguageListOutputSerializer,
         tags=["Project Languages"],
     )
-    def patch(self, request, project_id, lang_code):
+    def patch(self, request, project_slug, lang_code):
         project_language = get_object_or_404(
             ProjectLanguage,
-            project_id=project_id,
+            project__slug=project_slug,
             language=lang_code,
         )
 
@@ -174,10 +174,10 @@ class ProjectLanguageDetailAPIView(APIView):
         responses={204: None},
         tags=["Project Languages"],
     )
-    def delete(self, request, project_id, lang_code):
+    def delete(self, request, project_slug, lang_code):
         project_language = get_object_or_404(
             ProjectLanguage,
-            project_id=project_id,
+            project__slug=project_slug,
             language=lang_code,
         )
         project_language_remove(project_language=project_language)
@@ -190,8 +190,8 @@ class ProjectExportAPIView(APIView):
         responses={(200, "application/json"): OpenApiTypes.OBJECT},
         tags=["Projects"],
     )
-    def get(self, request, project_id):
-        project = _get_project(project_id, prefetch=["languages"])
+    def get(self, request, project_slug):
+        project = _get_project(project_slug, prefetch=["languages"])
 
         serializer = ProjectExportFilterSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)

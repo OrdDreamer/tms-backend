@@ -17,26 +17,26 @@ urlpatterns = [
         name="project-list",
     ),
     path(
-        "<uuid:project_id>/",
+        "<slug:project_slug>/",
         ProjectDetailAPIView.as_view(),
         name="project-detail",
     ),
     path(
-        "<uuid:project_id>/languages/",
+        "<slug:project_slug>/languages/",
         ProjectLanguageListCreateAPIView.as_view(),
         name="project-language-list",
     ),
     path(
-        "<uuid:project_id>/languages/<str:lang_code>/",
+        "<slug:project_slug>/languages/<str:lang_code>/",
         ProjectLanguageDetailAPIView.as_view(),
         name="project-language-detail",
     ),
     path(
-        "<uuid:project_id>/keys/",
+        "<slug:project_slug>/keys/",
         include("apps.translations.urls"),
     ),
     path(
-        "<uuid:project_id>/export/",
+        "<slug:project_slug>/export/",
         ProjectExportAPIView.as_view(),
         name="project-export",
     ),

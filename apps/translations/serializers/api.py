@@ -65,8 +65,8 @@ class TranslationKeyDetailOutputSerializer(serializers.Serializer):
 
 
 class TranslationKeyBulkDeleteInputSerializer(serializers.Serializer):
-    ids = serializers.ListField(
-        child=serializers.UUIDField(),
+    keys = serializers.ListField(
+        child=serializers.CharField(),
         min_length=1,
     )
 
