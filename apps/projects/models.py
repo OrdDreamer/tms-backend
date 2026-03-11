@@ -32,12 +32,6 @@ class Project(BaseModel):
     def __str__(self):
         return f"({self.slug}) {self.name}"
 
-    def get_base_language(self):
-        for lang in self.languages.all():
-            if lang.is_base_language:
-                return lang
-        return None
-
 
 class ProjectLanguage(BaseModel):
     """

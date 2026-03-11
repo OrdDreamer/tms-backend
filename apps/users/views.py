@@ -103,6 +103,7 @@ class UserChangePasswordAPIView(APIView):
 
         user = user_change_password(
             user=request.user,
+            current_password=serializer.validated_data["current_password"],
             new_password=serializer.validated_data["new_password"],
         )
         refresh = RefreshToken.for_user(user)

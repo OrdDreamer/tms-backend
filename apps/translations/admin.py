@@ -21,11 +21,11 @@ class TranslationKeyAdmin(admin.ModelAdmin):
     search_fields = ("key", "project__slug", "project__name")
     list_filter = ("project",)
     autocomplete_fields = ("project",)
-    readonly_fields = ("created_at", "updated_at")
+    readonly_fields = ("id", "created_at", "updated_at")
     inlines = (TranslationValueInline,)
 
     fieldsets = (
-        (None, {"fields": ("key", "project", "description")}),
+        (None, {"fields": ("id", "key", "project", "description")}),
         ("Timestamps", {
             "fields": ("created_at", "updated_at"),
         }),
@@ -57,10 +57,10 @@ class TranslationValueAdmin(admin.ModelAdmin):
     )
     list_filter = ("translation_key__project", "language")
     autocomplete_fields = ("translation_key",)
-    readonly_fields = ("created_at", "updated_at")
+    readonly_fields = ("id", "created_at", "updated_at")
 
     fieldsets = (
-        (None, {"fields": ("translation_key", "language", "value")}),
+        (None, {"fields": ("id", "translation_key", "language", "value")}),
         ("Timestamps", {
             "fields": ("created_at", "updated_at"),
         }),

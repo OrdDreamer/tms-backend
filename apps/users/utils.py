@@ -55,7 +55,9 @@ def user_update(*, user, email=None, first_name=None, last_name=None):
     return user
 
 
-def user_change_password(*, user, new_password):
+def user_change_password(*, user, current_password, new_password):
+    if not user.check_password(current_password):
+        raise AuthError("Invalid current password.")
     validate_password(new_password, user)
     _blacklist_all_tokens_for_user(user=user)
     user.set_password(new_password)
