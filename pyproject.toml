@@ -1,0 +1,15 @@
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "tms_backend.settings.test"
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = ["--strict-markers", "--tb=short", "-ra"]
+markers = ["slow: marks tests as slow"]
+
+[tool.coverage.run]
+source = ["apps"]
+omit = ["*/migrations/*", "*/management/*", "*/admin.py", "*/__init__.py"]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
