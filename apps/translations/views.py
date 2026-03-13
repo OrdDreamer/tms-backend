@@ -1,12 +1,17 @@
-from django.db.models import Count, Q
+import hashlib
+
+from django.db.models import Count, Max, Q
 from django.shortcuts import get_object_or_404
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
 from apps.projects.models import Project, ProjectLanguage
+from apps.projects.serializers import ProjectExportFilterSerializer
 from apps.translations.models import TranslationKey, TranslationValue
 from apps.translations.serializers import (
     TranslationBulkUpdateInputSerializer,
@@ -21,6 +26,7 @@ from apps.translations.serializers import (
     TranslationValueOutputSerializer,
 )
 from apps.translations.utils import (
+    project_translations_export,
     translation_key_bulk_delete,
     translation_key_create,
     translation_key_create_with_values,
@@ -348,3 +354,100 @@ class TranslationDetailAPIView(APIView):
         )
         translation_value_delete(translation_value=tv)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class PublicProjectTranslationsAPIView(APIView):
+    authentication_classes = []
+    permission_classes = []
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "public_api"
+
+    @extend_schema(
+        summary="Public translations export",
+        parameters=[
+            OpenApiParameter(
+                name="lang",
+                description="Export a single language (ISO 639-1 code)",
+                required=False,
+                type=str,
+            ),
+            OpenApiParameter(
+                name="export_format",
+                description="Output structure: flat (default) or nested",
+                required=False,
+                type=str,
+                enum=["flat", "nested"],
+            ),
+        ],
+        responses={(200, "application/json"): OpenApiTypes.OBJECT},
+        tags=["Public"],
+    )
+    def get(self, request, project_slug):
+        project = get_object_or_404(
+            Project.objects.prefetch_related("languages"),
+            slug=project_slug,
+        )
+
+        serializer = ProjectExportFilterSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+
+        language = serializer.validated_data.get("lang")
+        export_format = serializer.validated_data.get(
+            "export_format", "flat",
+        )
+
+        etag = self._compute_etag(project, language, export_format)
+
+        if request.META.get("HTTP_IF_NONE_MATCH") == etag:
+            response = Response(status=status.HTTP_304_NOT_MODIFIED)
+            response["ETag"] = etag
+            response["Cache-Control"] = "public, max-age=60"
+            return response
+
+        data = project_translations_export(
+            project=project,
+            language=language,
+            export_format=export_format,
+        )
+
+        response = Response(data)
+        response["ETag"] = etag
+        response["Cache-Control"] = "public, max-age=60"
+        return response
+
+    @staticmethod
+    def _compute_etag(project, language, export_format):
+        key_stats = TranslationKey.objects.filter(
+            project=project,
+        ).aggregate(latest=Max("updated_at"), total=Count("id"))
+
+        value_qs = TranslationValue.objects.filter(
+            translation_key__project=project,
+        )
+        if language:
+            value_qs = value_qs.filter(language=language)
+        value_stats = value_qs.aggregate(
+            latest=Max("updated_at"), total=Count("id"),
+        )
+
+        lang_stats = ProjectLanguage.objects.filter(
+            project=project,
+        ).aggregate(latest=Max("updated_at"), total=Count("id"))
+
+        timestamps = [
+            ts for ts in [
+                key_stats["latest"],
+                value_stats["latest"],
+                lang_stats["latest"],
+            ]
+            if ts is not None
+        ]
+        ts_str = max(timestamps).isoformat() if timestamps else "empty"
+
+        raw = (
+            f"{project.slug}:{language or 'all'}:{export_format}"
+            f":{ts_str}"
+            f":{key_stats['total']}:{value_stats['total']}"
+            f":{lang_stats['total']}"
+        )
+        return f'"{hashlib.md5(raw.encode()).hexdigest()}"'

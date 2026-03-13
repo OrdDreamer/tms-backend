@@ -6,6 +6,7 @@ sqlparse==0.5.5
 djangorestframework==3.16.1
 djangorestframework-simplejwt==5.5.1
 drf-spectacular==0.29.0
+django-cors-headers==4.9.0
 
 # Formatting and linting tools
 flake8==5.0.4
