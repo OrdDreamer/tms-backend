@@ -1,0 +1,14 @@
+.git
+__pycache__
+.venv
+.env
+db.sqlite3
+Dockerfile
+docker-compose*.yml
+htmlcov
+.pytest_cache
+docs/
+*.md
+.idea
+.cursor
+.vscode

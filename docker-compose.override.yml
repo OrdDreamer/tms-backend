@@ -1,0 +1,8 @@
+services:
+  web:
+    volumes:
+      - .:/app
+    environment:
+      DJANGO_SETTINGS_MODULE: tms_backend.settings.local
+      DATABASE_URL: postgres://${POSTGRES_USER:-tms_user}:${POSTGRES_PASSWORD:-tms_password}@db:5432/${POSTGRES_DB:-tms_backend}
+    command: python manage.py runserver 0.0.0.0:8000

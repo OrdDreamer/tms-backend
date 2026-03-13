@@ -1,13 +1,13 @@
 from .base import *  # noqa: F403
-from .base import BASE_DIR, REST_FRAMEWORK
+from .base import BASE_DIR, REST_FRAMEWORK, env
 
 DEBUG = True
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    "default": env.db(
+        "DATABASE_URL",
+        default=f"sqlite:///{str(BASE_DIR / 'db.sqlite3')}",
+    ),
 }
 
 REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] = [
