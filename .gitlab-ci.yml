@@ -1,0 +1,40 @@
+image: python:3.12-slim
+
+stages:
+  - quality
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.pip-cache"
+  DJANGO_SECRET_KEY: "ci-dummy-secret-key-not-for-production"
+
+cache:
+  key: "$CI_COMMIT_REF_SLUG"
+  paths:
+    - .pip-cache/
+
+workflow:
+  rules:
+    - if: $CI_MERGE_REQUEST_IID
+    - if: $CI_COMMIT_BRANCH == "master"
+
+lint:
+  stage: quality
+  script:
+    - pip install -r requirements.txt
+    - flake8 .
+
+test:
+  stage: quality
+  script:
+    - pip install -r requirements-test.txt
+    - pytest --cov --cov-report=term-missing --cov-report=html:htmlcov --cov-report=xml:coverage.xml
+  artifacts:
+    paths:
+      - htmlcov/
+      - coverage.xml
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+    expire_in: 7 days
+  coverage: '/^TOTAL\s+.*\s+(\d+(?:\.\d+)?)%/'

@@ -6,7 +6,7 @@ DEBUG = True
 DATABASES = {
     "default": env.db(
         "DATABASE_URL",
-        default=f"sqlite:///{str(BASE_DIR / 'db.sqlite3')}",
+        default="sqlite:///" + str(BASE_DIR / "db.sqlite3"),
     ),
 }
 
