@@ -42,6 +42,8 @@ class UserListAPIView(APIView):
         default_limit = 20
         max_limit = 100
 
+    pagination_class = Pagination
+
     @extend_schema(
         summary="List users",
         parameters=[

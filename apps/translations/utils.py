@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.utils import timezone
 
 from apps.core.exceptions import TranslationError
 from apps.projects.models import ProjectLanguage
@@ -290,6 +291,9 @@ def translation_value_bulk_update(*, translation_key, values_data):
         created = TranslationValue.objects.bulk_create(to_create)
 
     if to_update:
+        now = timezone.now()
+        for tv in to_update:
+            tv.updated_at = now
         TranslationValue.objects.bulk_update(
             to_update,
             ["value", "updated_at"]
