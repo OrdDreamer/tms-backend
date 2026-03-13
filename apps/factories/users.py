@@ -11,9 +11,10 @@ class UserFactory(factory.django.DjangoModelFactory):
     email = factory.Sequence(lambda n: f"user{n}@example.com")
     first_name = factory.Faker("first_name")
     last_name = factory.Faker("last_name")
+
     @factory.post_generation
-    def password(obj, create, extracted, **kwargs):
+    def password(self, create, extracted, **kwargs):
         password = extracted or "testpass123"
-        obj.set_password(password)
+        self.set_password(password)
         if create:
-            obj.save(update_fields=["password"])
+            self.save(update_fields=["password"])

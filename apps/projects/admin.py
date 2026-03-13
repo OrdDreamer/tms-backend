@@ -26,7 +26,8 @@ class ProjectAdmin(admin.ModelAdmin):
 
     def display_base_language(self, obj):
         base_language = next(
-            (lang for lang in obj.languages.all() if lang.is_base_language), None
+            (lang for lang in obj.languages.all() if lang.is_base_language),
+            None
         )
         return (
             (f"{base_language.get_language_display()} "

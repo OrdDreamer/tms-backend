@@ -16,7 +16,7 @@ def _humanize(suffix: str) -> str:
 
 
 def generate_keys(
-    namespaces: dict[str, list],
+        namespaces: dict[str, list],
 ) -> list[tuple[str, str, str]]:
     """Expand namespace templates into (dotted_key, description, en_value)."""
     result: list[tuple[str, str, str]] = []
@@ -54,7 +54,8 @@ WEB_APP_NAMESPACES = {
         "language", "project", "key", "value", "actions", "details",
     ],
     "common.messages": [
-        ("success", "Operation completed successfully"), ("error", "An error occurred"),
+        ("success", "Operation completed successfully"),
+        ("error", "An error occurred"),
         "warning", ("loading", "Loading..."), ("saving", "Saving..."),
         ("no_results", "No results found"),
         ("confirm_delete", "Are you sure you want to delete this item?"),
@@ -73,17 +74,23 @@ WEB_APP_NAMESPACES = {
         ("field_invalid", "This field is invalid"),
     ],
     "auth.login.form": [
-        ("title", "Sign In"), ("subtitle", "Enter your credentials to continue"),
-        ("email_label", "Email address"), ("email_placeholder", "you@example.com"),
-        ("password_label", "Password"), ("password_placeholder", "Enter your password"),
+        ("title", "Sign In"),
+        ("subtitle", "Enter your credentials to continue"),
+        ("email_label", "Email address"),
+        ("email_placeholder", "you@example.com"),
+        ("password_label", "Password"),
+        ("password_placeholder", "Enter your password"),
         ("submit_button", "Sign In"), ("forgot_password", "Forgot password?"),
-        ("remember_me", "Remember me"), ("no_account", "Don't have an account?"),
+        ("remember_me", "Remember me"),
+        ("no_account", "Don't have an account?"),
     ],
     "auth.register.form": [
-        ("title", "Create Account"), ("subtitle", "Fill in the details to get started"),
+        ("title", "Create Account"),
+        ("subtitle", "Fill in the details to get started"),
         ("first_name", "First name"), ("last_name", "Last name"),
         ("email", "Email address"), ("password", "Password"),
-        ("confirm_password", "Confirm password"), ("submit_button", "Create Account"),
+        ("confirm_password", "Confirm password"),
+        ("submit_button", "Create Account"),
     ],
     "auth.register.validation": [
         ("email_taken", "This email is already registered"),
@@ -103,7 +110,8 @@ WEB_APP_NAMESPACES = {
     ],
     "auth.password.change": [
         ("title", "Change Password"), ("current_label", "Current password"),
-        ("new_label", "New password"), ("confirm_label", "Confirm new password"),
+        ("new_label", "New password"),
+        ("confirm_label", "Confirm new password"),
         ("submit_button", "Update Password"),
         ("success_message", "Password updated successfully"),
     ],
@@ -118,7 +126,8 @@ WEB_APP_NAMESPACES = {
     "dashboard.stats.cards": [
         ("total_projects", "Total Projects"), ("total_keys", "Total Keys"),
         ("total_translations", "Total Translations"),
-        ("completion_rate", "Completion Rate"), ("recent_changes", "Recent Changes"),
+        ("completion_rate", "Completion Rate"),
+        ("recent_changes", "Recent Changes"),
         ("untranslated", "Untranslated"), ("languages", "Languages"),
         ("active_users", "Active Users"),
     ],
@@ -140,7 +149,8 @@ WEB_APP_NAMESPACES = {
     "errors.http.forbidden": [
         ("title", "Access Denied"),
         ("description", "You do not have permission to access this page"),
-        ("contact_admin", "Contact administrator"), ("back_home", "Go to Homepage"),
+        ("contact_admin", "Contact administrator"),
+        ("back_home", "Go to Homepage"),
     ],
     "errors.http.server_error": [
         ("title", "Server Error"),
@@ -160,7 +170,8 @@ WEB_APP_NAMESPACES = {
         ("length_exceeded", "Maximum length exceeded"),
     ],
     "errors.network.status": [
-        ("connection_lost", "Connection lost"), ("timeout", "Request timed out"),
+        ("connection_lost", "Connection lost"),
+        ("timeout", "Request timed out"),
         "retry", ("offline_mode", "You are offline"),
     ],
     "settings.profile.general": [
@@ -170,18 +181,21 @@ WEB_APP_NAMESPACES = {
     ],
     "settings.profile.avatar": [
         ("title", "Profile Picture"), ("upload", "Upload Photo"),
-        ("remove", "Remove Photo"), ("max_size_hint", "Maximum file size: 5MB"),
+        ("remove", "Remove Photo"),
+        ("max_size_hint", "Maximum file size: 5MB"),
         ("allowed_formats", "Allowed formats: JPG, PNG"), "preview",
     ],
     "settings.security.password": [
         ("title", "Change Password"), ("current", "Current password"),
         ("new_field", "New password"), ("confirm", "Confirm new password"),
-        ("requirements_hint", "At least 8 characters with one uppercase letter"),
+        ("requirements_hint",
+         "At least 8 characters with one uppercase letter"),
         ("submit", "Update Password"),
     ],
     "settings.notifications.email": [
         ("title", "Email Notifications"),
-        ("enabled", "Enable email notifications"), ("daily_digest", "Daily digest"),
+        ("enabled", "Enable email notifications"),
+        ("daily_digest", "Daily digest"),
         ("weekly_report", "Weekly report"),
         ("on_mention", "When someone mentions me"),
         ("on_key_update", "When a key is updated"),
@@ -190,8 +204,10 @@ WEB_APP_NAMESPACES = {
     "settings.notifications.push": [
         ("title", "Push Notifications"),
         ("enabled", "Enable push notifications"),
-        ("new_translation", "New translation added"), ("new_comment", "New comment"),
-        ("task_assigned", "Task assigned to me"), ("deadline", "Deadline reminder"),
+        ("new_translation", "New translation added"),
+        ("new_comment", "New comment"),
+        ("task_assigned", "Task assigned to me"),
+        ("deadline", "Deadline reminder"),
     ],
     "settings.api.tokens": [
         ("title", "API Tokens"),
@@ -253,14 +269,16 @@ WEB_APP_NAMESPACES = {
     ],
     "translations.filters.panel": [
         ("all_keys", "All Keys"), ("translated_only", "Translated"),
-        ("untranslated_only", "Untranslated"), ("needs_review", "Needs Review"),
+        ("untranslated_only", "Untranslated"),
+        ("needs_review", "Needs Review"),
         ("by_language", "By Language"), ("by_namespace", "By Namespace"),
         ("clear_filters", "Clear Filters"),
     ],
     "forms.project.create": [
         ("title", "Create Project"), ("name_label", "Project name"),
         ("name_placeholder", "My Project"), ("slug_label", "Slug"),
-        ("slug_placeholder", "my-project"), ("description_label", "Description"),
+        ("slug_placeholder", "my-project"),
+        ("description_label", "Description"),
         ("base_language_label", "Base language"), ("submit_button", "Create"),
     ],
     "forms.project.settings": [
@@ -294,7 +312,8 @@ WEB_APP_NAMESPACES = {
         ("next_page", "Next"), ("previous_page", "Previous"),
     ],
     "table.headers.columns": [
-        "key", "value", "language", "status", ("updated_at", "Updated"), "actions",
+        "key", "value", "language", "status", ("updated_at", "Updated"),
+        "actions",
     ],
     "modal.confirm.dialog": [
         ("title", "Confirm Action"),
@@ -317,7 +336,6 @@ WEB_APP_NAMESPACES = {
     ],
 }
 
-
 # ═══════════════════════════════════════════════════════════════════════════════
 # Mobile Application  (60 keys)
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -328,12 +346,15 @@ MOBILE_APP_NAMESPACES = {
         "confirm", "search", "share",
     ],
     "common.labels": [
-        "name", "email", "phone", "status", "date", "language", "version", "size",
+        "name", "email", "phone", "status", "date", "language", "version",
+        "size",
     ],
     "onboarding.welcome.screen": [
         ("title", "Welcome to TMS"),
         ("subtitle", "Manage translations on the go"),
-        ("description", "Access your projects, review translations, and collaborate with your team anywhere"),
+        ("description",
+         "Access your projects, review translations, "
+         "and collaborate with your team anywhere"),
         ("skip_button", "Skip"), ("next_button", "Next"),
         ("start_button", "Get Started"),
     ],
@@ -351,7 +372,8 @@ MOBILE_APP_NAMESPACES = {
         ("allow_button", "Allow"), ("deny_button", "Deny"),
     ],
     "push.notifications.types": [
-        ("new_message", "New message"), ("update_available", "Update available"),
+        ("new_message", "New message"),
+        ("update_available", "Update available"),
         ("reminder", "Reminder"), ("achievement", "Achievement unlocked"),
         ("system_alert", "System alert"),
     ],
@@ -373,7 +395,6 @@ MOBILE_APP_NAMESPACES = {
     ],
 }
 
-
 # ═══════════════════════════════════════════════════════════════════════════════
 # Marketing Website  (40 keys)
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -382,27 +403,37 @@ MARKETING_SITE_NAMESPACES = {
     "hero.main.content": [
         ("title", "Translate Your Product With Confidence"),
         ("subtitle", "The modern translation management platform for teams"),
-        ("description", "Streamline your localization workflow with powerful collaboration tools and seamless integrations"),
+        ("description",
+         "Streamline your localization workflow with powerful "
+         "collaboration tools and seamless integrations"),
         ("cta_button", "Start Free Trial"), ("secondary_link", "Learn More"),
     ],
     "hero.secondary.content": [
         ("title", "Trusted by 10,000+ Teams Worldwide"),
-        ("description", "From startups to enterprises, teams rely on TMS for their translation needs"),
+        ("description",
+         "From startups to enterprises, teams "
+         "rely on TMS for their translation needs"),
         ("cta_button", "Get Started Free"),
         ("image_alt", "Translation management dashboard screenshot"),
     ],
     "features.list.items": [
         ("title", "Why Choose TMS?"), ("fast_title", "Lightning Fast"),
-        ("fast_description", "Import and export translations in seconds, not minutes"),
+        ("fast_description",
+         "Import and export translations in seconds, not minutes"),
         ("secure_title", "Enterprise Security"),
-        ("secure_description", "Your data is encrypted at rest and in transit"),
+        ("secure_description",
+         "Your data is encrypted at rest and in transit"),
         ("scalable_title", "Infinitely Scalable"),
     ],
     "features.detail.descriptions": [
-        ("fast_text", "Our optimized pipeline processes thousands of keys per second"),
-        ("secure_text", "SOC 2 compliant with end-to-end encryption and audit logging"),
-        ("scalable_text", "Handle millions of translations across hundreds of projects"),
-        ("reliable_text", "99.99% uptime SLA with automatic failover and backups"),
+        ("fast_text",
+         "Our optimized pipeline processes thousands of keys per second"),
+        ("secure_text",
+         "SOC 2 compliant with end-to-end encryption and audit logging"),
+        ("scalable_text",
+         "Handle millions of translations across hundreds of projects"),
+        ("reliable_text",
+         "99.99% uptime SLA with automatic failover and backups"),
     ],
     "pricing.plans.labels": [
         ("title", "Simple, Transparent Pricing"),
@@ -411,8 +442,10 @@ MARKETING_SITE_NAMESPACES = {
         ("enterprise_name", "Enterprise"),
     ],
     "pricing.plans.features": [
-        ("unlimited_projects", "Unlimited projects"), ("api_access", "API access"),
-        ("priority_support", "Priority support"), ("custom_domain", "Custom domain"),
+        ("unlimited_projects", "Unlimited projects"),
+        ("api_access", "API access"),
+        ("priority_support", "Priority support"),
+        ("custom_domain", "Custom domain"),
         "analytics",
     ],
     "cta.primary.content": [

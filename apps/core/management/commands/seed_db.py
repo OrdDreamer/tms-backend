@@ -68,7 +68,7 @@ PROJECTS = [
 
 
 class Command(BaseCommand):
-    help = "Seed database with realistic development data"
+    help = "Seed database with realistic development data"  # noqa: VNE003
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -104,14 +104,17 @@ class Command(BaseCommand):
         deleted_projects = Project.objects.filter(slug__in=slugs).delete()[0]
         deleted_users = User.objects.filter(email=SUPERUSER_EMAIL).delete()[0]
         self.stdout.write(
-            f"Flushed: {deleted_projects} projects, {deleted_langs} languages, "
+            f"Flushed: {deleted_projects} projects, "
+            f"{deleted_langs} languages, "
             f"{deleted_keys} keys, {deleted_translations} values, "
             f"{deleted_users} users"
         )
 
     def _create_superuser(self):
         if User.objects.filter(email=SUPERUSER_EMAIL).exists():
-            self.stdout.write(f"Superuser {SUPERUSER_EMAIL} already exists — skipped")
+            self.stdout.write(
+                f"Superuser {SUPERUSER_EMAIL} already exists — skipped"
+            )
             return
         User.objects.create_superuser(
             email=SUPERUSER_EMAIL,
@@ -127,7 +130,8 @@ class Command(BaseCommand):
             defaults={"name": cfg["name"], "description": cfg["description"]},
         )
         if not created:
-            self.stdout.write(f"Project «{project.slug}» already exists — skipped")
+            self.stdout.write(
+                f"Project «{project.slug}» already exists — skipped")
             return
 
         base_lang_code, target_lang_codes = None, []

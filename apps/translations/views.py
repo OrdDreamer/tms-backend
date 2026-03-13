@@ -85,13 +85,17 @@ class TranslationKeyListCreateAPIView(APIView):
             ),
             OpenApiParameter(
                 name="untranslated",
-                description="Return only keys without a translation for the given lang",
+                description=(
+                    "Return only keys without a translation for the given lang"
+                ),
                 required=False,
                 type=bool,
             ),
             OpenApiParameter(
                 name="include_translations",
-                description="Include translations in the response (default true)",
+                description=(
+                    "Include translations in the response (default true)"
+                ),
                 required=False,
                 type=bool,
             ),
@@ -445,9 +449,9 @@ class PublicProjectTranslationsAPIView(APIView):
         ts_str = max(timestamps).isoformat() if timestamps else "empty"
 
         raw = (
-            f"{project.slug}:{language or 'all'}:{export_format}"
-            f":{ts_str}"
-            f":{key_stats['total']}:{value_stats['total']}"
-            f":{lang_stats['total']}"
+            f"{project.slug}: {language or "all"}: {export_format}"
+            f": {ts_str}"
+            f": {key_stats["total"]}: {value_stats["total"]}"
+            f": {lang_stats["total"]}"
         )
         return f'"{hashlib.md5(raw.encode()).hexdigest()}"'

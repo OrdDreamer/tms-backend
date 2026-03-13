@@ -17,7 +17,10 @@ class TranslationKeyListFilterSerializer(serializers.Serializer):
     search = serializers.CharField(required=False)
     lang = serializers.CharField(required=False)
     untranslated = serializers.BooleanField(required=False, default=False)
-    include_translations = serializers.BooleanField(required=False, default=True)
+    include_translations = serializers.BooleanField(
+        required=False,
+        default=True
+    )
 
 
 class TranslationKeyCreateInputSerializer(serializers.Serializer):

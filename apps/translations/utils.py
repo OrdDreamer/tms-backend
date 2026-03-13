@@ -51,14 +51,16 @@ def _validate_key_no_nesting_conflict(*, project, key, exclude_id=None):
     parts = key.split(".")
     ancestor_keys = [".".join(parts[:i]) for i in range(1, len(parts))]
     if ancestor_keys:
-        conflicts = list(qs.filter(key__in=ancestor_keys).values_list("key", flat=True))
+        conflicts = list(
+            qs.filter(key__in=ancestor_keys).values_list("key", flat=True))
         if conflicts:
             raise TranslationError(
                 f"Key '{key}' conflicts with an existing parent key.",
                 extra={"key": key, "conflicting_keys": conflicts},
             )
 
-    conflicts = list(qs.filter(key__startswith=f"{key}.").values_list("key", flat=True))
+    conflicts = list(
+        qs.filter(key__startswith=f"{key}.").values_list("key", flat=True))
     if conflicts:
         raise TranslationError(
             f"Key '{key}' conflicts with existing nested keys.",
@@ -381,7 +383,8 @@ def translation_key_bulk_delete(*, project, key_names):
     return deleted_count
 
 
-def project_translations_export(*, project, language=None, export_format="flat"):
+def project_translations_export(*, project, language=None,
+                                export_format="flat"):
     """
     Export translations for a project.
 
@@ -401,7 +404,8 @@ def project_translations_export(*, project, language=None, export_format="flat")
 
     Returns:
         dict — when language is set, returns a single language mapping;
-               otherwise, returns {lang_code: mapping} for every project language.
+               otherwise, returns {lang_code: mapping}
+               for every project language.
 
     Raises:
         TranslationError — if language is not configured for the project.

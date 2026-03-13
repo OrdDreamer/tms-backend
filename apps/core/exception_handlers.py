@@ -10,7 +10,9 @@ def custom_exception_handler(exc, context):
 
     # Handle Django validation errors
     if isinstance(exc, DjangoValidationError):
-        data = exc.message_dict if hasattr(exc, "message_dict") else {"non_field_errors": exc.messages}
+        data = exc.message_dict if hasattr(exc, "message_dict") else {
+            "non_field_errors": exc.messages
+        }
         return Response({
             "message": "Validation error",
             "extra": data,
