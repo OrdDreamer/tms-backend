@@ -7,6 +7,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
+from apps.core.throttling import LoginRateThrottle
 from apps.translations.views import PublicProjectTranslationsAPIView
 from apps.users.views import UserLogoutAPIView
 
@@ -15,7 +16,7 @@ urlpatterns = [
     path("api-auth/", include("rest_framework.urls")),
     path(
         "api/v1/auth/token/",
-        TokenObtainPairView.as_view(),
+        TokenObtainPairView.as_view(throttle_classes=[LoginRateThrottle]),
         name="token-obtain-pair"
     ),
     path(

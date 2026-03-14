@@ -1,5 +1,6 @@
 import logging
 
+from rest_framework.exceptions import Throttled
 from rest_framework.views import exception_handler
 from rest_framework.response import Response
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -11,6 +12,11 @@ logger = logging.getLogger(__name__)
 
 def custom_exception_handler(exc, context):
     """Custom exception handler for consistent API errors."""
+
+    if isinstance(exc, Throttled):
+        wait = int(exc.wait) if exc.wait else None
+        msg = f"Too many requests. Retry in {wait}s." if wait else "Too many requests."
+        return Response({"message": msg, "extra": {}}, status=429)
 
     # Handle Django validation errors (400 — normal behaviour, no logging)
     if isinstance(exc, DjangoValidationError):
