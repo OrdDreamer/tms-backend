@@ -10,6 +10,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 import environ
 
+from datetime import timedelta
 from pathlib import Path
 
 env = environ.Env()
@@ -164,3 +165,15 @@ DRF_STANDARDIZED_ERRORS = {
 # CORS
 CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
 CORS_ALLOW_CREDENTIALS = True
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(
+        minutes=env.int("JWT_ACCESS_TOKEN_LIFETIME_MINUTES", default=60)
+    ),
+    "REFRESH_TOKEN_LIFETIME": timedelta(
+        days=env.int("JWT_REFRESH_TOKEN_LIFETIME_DAYS", default=7)
+    ),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "SIGNING_KEY": env("JWT_SIGNING_KEY", default=SECRET_KEY),
+}
