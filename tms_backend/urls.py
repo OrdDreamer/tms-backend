@@ -29,6 +29,7 @@ urlpatterns = [
         UserLogoutAPIView.as_view(),
         name="auth-logout"
     ),
+    path("api/", include("apps.core.urls")),
     path("api/v1/projects/", include("apps.projects.urls")),
     path("api/v1/users/", include("apps.users.urls")),
     path(
