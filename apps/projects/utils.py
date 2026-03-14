@@ -2,6 +2,7 @@ from django.db import transaction
 
 from apps.core.exceptions import ProjectError
 from apps.projects.models import Project, ProjectLanguage
+from apps.translations.utils import invalidate_project_export_cache
 
 
 def project_create(*, slug, name, description=""):
@@ -34,6 +35,7 @@ def project_delete(*, project):
     Args:
         project: Project — instance to delete.
     """
+    invalidate_project_export_cache(project_id=project.id)
     project.delete()
 
 
@@ -117,6 +119,7 @@ def project_language_add(*, project, language, is_base_language=False):
     )
     project_language.full_clean()
     project_language.save()
+    invalidate_project_export_cache(project_id=project.id)
     return project_language
 
 
@@ -146,6 +149,7 @@ def project_language_remove(*, project_language):
     if not languages.exclude(pk=project_language.pk).exists():
         raise ProjectError("Cannot delete the last language of a project.")
 
+    invalidate_project_export_cache(project_id=project_language.project_id)
     project_language.delete()
 
 
@@ -179,6 +183,7 @@ def project_language_set_base(*, project_language):
     ).update(is_base_language=True)
 
     project_language.refresh_from_db(fields=["is_base_language"])
+    invalidate_project_export_cache(project_id=project_language.project_id)
     return project_language
 
 
@@ -235,4 +240,5 @@ def project_language_bulk_add(*, project, languages_data):
         pl.save()
         created.append(pl)
 
+    invalidate_project_export_cache(project_id=project.id)
     return created

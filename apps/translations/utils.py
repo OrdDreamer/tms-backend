@@ -1,9 +1,36 @@
+import logging
+
+from django.core.cache import cache
 from django.db import transaction
 from django.utils import timezone
 
 from apps.core.exceptions import TranslationError
 from apps.projects.models import ProjectLanguage
 from apps.translations.models import TranslationKey, TranslationValue
+
+logger = logging.getLogger(__name__)
+
+EXPORT_CACHE_TTL = 3600
+EXPORT_CACHE_PREFIX = "export"
+
+
+def _export_cache_key(project_id, language, export_format):
+    lang = language or "all"
+    return f"{EXPORT_CACHE_PREFIX}:{project_id}:{lang}:{export_format}"
+
+
+def invalidate_project_export_cache(*, project_id):
+    pattern = f"*{EXPORT_CACHE_PREFIX}:{project_id}:*"
+    delete_pattern = getattr(cache, "delete_pattern", None)
+    if delete_pattern is not None:
+        delete_pattern(pattern)
+    else:
+        for fmt in ("flat", "nested"):
+            cache.delete(_export_cache_key(project_id, None, fmt))
+        logger.debug(
+            "delete_pattern not available; cleared known export keys for %s",
+            project_id,
+        )
 
 
 def _validate_language_belongs_to_project(*, translation_key, language):
@@ -96,6 +123,7 @@ def translation_key_create(*, project, key, description=""):
     )
     translation_key.full_clean()
     translation_key.save()
+    invalidate_project_export_cache(project_id=project.id)
     return translation_key
 
 
@@ -137,6 +165,7 @@ def translation_key_update(*, translation_key, key=None, description=None):
 
     translation_key.full_clean()
     translation_key.save(update_fields=[*update_fields, "updated_at"])
+    invalidate_project_export_cache(project_id=translation_key.project_id)
     return translation_key
 
 
@@ -147,6 +176,7 @@ def translation_key_delete(*, translation_key):
     Args:
         translation_key: TranslationKey — instance to delete.
     """
+    invalidate_project_export_cache(project_id=translation_key.project_id)
     translation_key.delete()
 
 
@@ -182,6 +212,7 @@ def translation_value_create(*, translation_key, language, value):
     )
     translation_value.full_clean()
     translation_value.save()
+    invalidate_project_export_cache(project_id=translation_key.project_id)
     return translation_value
 
 
@@ -200,12 +231,18 @@ def translation_value_update(*, translation_value, value):
         was blank (record deleted).
     """
     if not value:
+        invalidate_project_export_cache(
+            project_id=translation_value.translation_key.project_id,
+        )
         translation_value.delete()
         return None
 
     translation_value.value = value
     translation_value.full_clean()
     translation_value.save(update_fields=["value", "updated_at"])
+    invalidate_project_export_cache(
+        project_id=translation_value.translation_key.project_id,
+    )
     return translation_value
 
 
@@ -216,6 +253,9 @@ def translation_value_delete(*, translation_value):
     Args:
         translation_value: TranslationValue — instance to delete.
     """
+    invalidate_project_export_cache(
+        project_id=translation_value.translation_key.project_id,
+    )
     translation_value.delete()
 
 
@@ -310,6 +350,8 @@ def translation_value_bulk_update(*, translation_key, values_data):
             id__in=to_delete_ids,
         ).delete()
 
+    invalidate_project_export_cache(project_id=translation_key.project_id)
+
     return {
         "created": created,
         "updated": to_update,
@@ -379,6 +421,7 @@ def translation_key_bulk_delete(*, project, key_names):
         project=project,
         key__in=key_names,
     ).delete()
+    invalidate_project_export_cache(project_id=project.id)
     return deleted_count
 
 
@@ -410,6 +453,11 @@ def project_translations_export(
     Raises:
         TranslationError — if language is not configured for the project.
     """
+    cache_key = _export_cache_key(project.id, language, export_format)
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+
     project_langs = list(project.languages.values_list("language", flat=True))
 
     if language:
@@ -456,6 +504,9 @@ def project_translations_export(
     builder = _build_nested if export_format == "nested" else _build_flat
 
     if language:
-        return builder(language)
+        result = builder(language)
+    else:
+        result = {lang: builder(lang) for lang in target_langs}
 
-    return {lang: builder(lang) for lang in target_langs}
+    cache.set(cache_key, result, EXPORT_CACHE_TTL)
+    return result
