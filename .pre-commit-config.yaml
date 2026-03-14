@@ -13,3 +13,12 @@ repos:
       - id: ruff          # linting (replaces flake8 + isort)
         args: [--fix]
       - id: ruff-format   # formatting (replaces black)
+
+  - repo: local
+    hooks:
+      - id: django-check-migrations
+        name: Check for missing migrations
+        entry: python manage.py makemigrations --check --dry-run
+        language: system
+        pass_filenames: false
+        types: [python]

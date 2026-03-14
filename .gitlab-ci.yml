@@ -1,7 +1,8 @@
 image: python:3.12-slim
 
 stages:
-  - quality
+  - lint
+  - test
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.pip-cache"
@@ -18,13 +19,14 @@ workflow:
     - if: $CI_COMMIT_BRANCH == "master"
 
 lint:
-  stage: quality
+  stage: lint
   script:
     - pip install -r requirements.txt
-    - flake8 .
+    - ruff check .
+    - ruff format --check .
 
 test:
-  stage: quality
+  stage: test
   script:
     - pip install -r requirements-test.txt
     - pytest --cov --cov-report=term-missing --cov-report=html:htmlcov --cov-report=xml:coverage.xml
