@@ -9,7 +9,3 @@ drf-spectacular==0.29.0
 django-cors-headers==4.9.0
 django-redis==5.4.0
 gunicorn==23.0.0
-
-# Formatting and linting tools
-ruff==0.9.10
-pre-commit==4.2.0
