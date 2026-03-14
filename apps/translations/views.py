@@ -43,12 +43,11 @@ def _get_project(project_slug):
     return get_object_or_404(Project, slug=project_slug)
 
 
-def _get_translation_key(project_slug, key_name):
-    return get_object_or_404(
-        TranslationKey,
-        key=key_name,
-        project__slug=project_slug,
-    )
+def _get_translation_key(project_slug, key_name, prefetch=None):
+    qs = TranslationKey.objects.select_related("project")
+    if prefetch:
+        qs = qs.prefetch_related(*prefetch)
+    return get_object_or_404(qs, key=key_name, project__slug=project_slug)
 
 
 def _get_project_languages(project):
@@ -202,7 +201,7 @@ class TranslationKeyDetailAPIView(APIView):
         tags=["Translation Keys"],
     )
     def get(self, request, project_slug, key_name):
-        tk = _get_translation_key(project_slug, key_name)
+        tk = _get_translation_key(project_slug, key_name, prefetch=["values"])
         project_languages = _get_project_languages(tk.project)
 
         output = TranslationKeyDetailOutputSerializer(
@@ -218,7 +217,7 @@ class TranslationKeyDetailAPIView(APIView):
         tags=["Translation Keys"],
     )
     def patch(self, request, project_slug, key_name):
-        tk = _get_translation_key(project_slug, key_name)
+        tk = _get_translation_key(project_slug, key_name, prefetch=["values"])
         project_languages = _get_project_languages(tk.project)
 
         serializer = TranslationKeyUpdateInputSerializer(data=request.data)
