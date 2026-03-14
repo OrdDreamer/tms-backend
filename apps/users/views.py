@@ -21,7 +21,7 @@ from apps.users.utils import user_change_password, user_logout, user_update
 
 
 class UserLogoutAPIView(APIView):
-    permission_classes = []
+    permission_classes = ()
 
     @extend_schema(
         summary="Logout (blacklist refresh token)",

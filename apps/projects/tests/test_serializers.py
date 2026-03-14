@@ -1,7 +1,7 @@
 from apps.projects.serializers import (
     ProjectCreateInputSerializer,
-    ProjectUpdateInputSerializer,
     ProjectExportFilterSerializer,
+    ProjectUpdateInputSerializer,
 )
 
 

@@ -52,8 +52,8 @@ class TestTranslationKeyModel:
     def test_unique_key_per_project(self):
         project = ProjectFactory()
         TranslationKeyFactory(project=project, key="common.hello")
+        dup = TranslationKey(project=project, key="common.hello")
         with pytest.raises(ValidationError):
-            dup = TranslationKey(project=project, key="common.hello")
             dup.full_clean()
 
     def test_same_key_different_projects(self):
@@ -69,10 +69,8 @@ class TestTranslationValueModel:
     def test_unique_per_language(self):
         tk = TranslationKeyFactory()
         TranslationValueFactory(translation_key=tk, language="en")
+        dup = TranslationValue(translation_key=tk, language="en", value="dup")
         with pytest.raises(ValidationError):
-            dup = TranslationValue(
-                translation_key=tk, language="en", value="dup"
-            )
             dup.full_clean()
 
     def test_str(self):

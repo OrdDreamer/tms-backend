@@ -1,6 +1,5 @@
 from rest_framework import serializers
 
-
 # ----------------------
 # User
 # ----------------------
@@ -11,7 +10,7 @@ class UserListFilterSerializer(serializers.Serializer):
 
 
 class UserListOutputSerializer(serializers.Serializer):
-    id = serializers.IntegerField()  # noqa: VNE003
+    id = serializers.IntegerField()
     email = serializers.EmailField()
     first_name = serializers.CharField()
     last_name = serializers.CharField()
@@ -19,7 +18,7 @@ class UserListOutputSerializer(serializers.Serializer):
 
 
 class UserDetailOutputSerializer(serializers.Serializer):
-    id = serializers.IntegerField()  # noqa: VNE003
+    id = serializers.IntegerField()
     email = serializers.EmailField()
     first_name = serializers.CharField()
     last_name = serializers.CharField()

@@ -2,7 +2,6 @@ from rest_framework import serializers
 
 from apps.core.choices import LanguageChoices
 
-
 # ----------------------
 # Project Language
 # ----------------------
@@ -18,7 +17,7 @@ class ProjectLanguageUpdateInputSerializer(serializers.Serializer):
 
 
 class ProjectLanguageListOutputSerializer(serializers.Serializer):
-    id = serializers.UUIDField()  # noqa: VNE003
+    id = serializers.UUIDField()
     language = serializers.CharField()
     is_base_language = serializers.BooleanField()
     created_at = serializers.DateTimeField()
@@ -42,7 +41,7 @@ class ProjectUpdateInputSerializer(serializers.Serializer):
 
 
 class ProjectListOutputSerializer(serializers.Serializer):
-    id = serializers.UUIDField()  # noqa: VNE003
+    id = serializers.UUIDField()
     slug = serializers.SlugField()
     name = serializers.CharField()
     description = serializers.CharField()
@@ -51,7 +50,7 @@ class ProjectListOutputSerializer(serializers.Serializer):
 
 
 class ProjectDetailOutputSerializer(serializers.Serializer):
-    id = serializers.UUIDField()  # noqa: VNE003
+    id = serializers.UUIDField()
     slug = serializers.SlugField()
     name = serializers.CharField()
     description = serializers.CharField()

@@ -59,7 +59,7 @@ class TranslationKeyListOutputSerializer(serializers.Serializer):
 
 
 class TranslationKeyDetailOutputSerializer(serializers.Serializer):
-    id = serializers.UUIDField()  # noqa: VNE003
+    id = serializers.UUIDField()
     key = serializers.CharField()
     description = serializers.CharField()
     translations = serializers.SerializerMethodField()

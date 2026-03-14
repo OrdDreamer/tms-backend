@@ -1,10 +1,10 @@
 from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.exceptions import TokenError
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.token_blacklist.models import (
     BlacklistedToken,
     OutstandingToken,
 )
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.core.exceptions import AuthError
 from apps.users.models import User

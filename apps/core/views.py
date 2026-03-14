@@ -1,4 +1,4 @@
-from django.db import connection, OperationalError
+from django.db import OperationalError, connection
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.permissions import AllowAny
@@ -9,9 +9,9 @@ from apps.core.serializers import HealthCheckOutputSerializer
 
 
 class HealthCheckAPIView(APIView):
-    authentication_classes = []
-    permission_classes = [AllowAny]
-    throttle_classes = []
+    authentication_classes = ()
+    permission_classes = (AllowAny,)
+    throttle_classes = ()
 
     @extend_schema(
         summary="Health check",

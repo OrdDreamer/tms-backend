@@ -374,9 +374,9 @@ class TranslationDetailAPIView(APIView):
 
 
 class PublicProjectTranslationsAPIView(APIView):
-    authentication_classes = []
-    permission_classes = []
-    throttle_classes = [ScopedRateThrottle]
+    authentication_classes = ()
+    permission_classes = ()
+    throttle_classes = (ScopedRateThrottle,)
     throttle_scope = "public_api"
 
     @extend_schema(
@@ -470,4 +470,5 @@ class PublicProjectTranslationsAPIView(APIView):
             f": {key_stats['total']}: {value_stats['total']}"
             f": {lang_stats['total']}"
         )
-        return f'"{hashlib.md5(raw.encode()).hexdigest()}"'
+        digest = hashlib.md5(raw.encode(), usedforsecurity=False).hexdigest()
+        return f'"{digest}"'

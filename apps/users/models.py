@@ -51,7 +51,7 @@ class CustomUserManager(BaseUserManager):
     def get_by_natural_key(self, username):
         """
         Normalize email before lookup so that varying case in the domain
-        doesn’t block authentication.
+        does not block authentication.
         """
         email = self.normalize_email(username).lower()
         return self.get(**{self.model.USERNAME_FIELD: email})

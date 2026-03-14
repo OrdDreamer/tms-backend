@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import patch
+
+import pytest
 from django.db import OperationalError
 from rest_framework.test import APIClient
 

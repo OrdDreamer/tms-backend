@@ -20,7 +20,7 @@ from apps.translations.models import TranslationKey, TranslationValue
 from apps.users.models import User
 
 SUPERUSER_EMAIL = "admin@admin.com"
-SUPERUSER_PASSWORD = "admin"
+SUPERUSER_PASSWORD = "admin"  # noqa: S105
 
 PROJECTS = [
     {
@@ -69,7 +69,7 @@ PROJECTS = [
 
 
 class Command(BaseCommand):
-    help = "Seed database with realistic development data"  # noqa: VNE003
+    help = "Seed database with realistic development data"
 
     def add_arguments(self, parser):
         parser.add_argument(
