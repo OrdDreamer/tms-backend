@@ -7,6 +7,7 @@ from apps.core.choices import LanguageChoices
 # Project Language
 # ----------------------
 
+
 class ProjectLanguageCreateInputSerializer(serializers.Serializer):
     language = serializers.ChoiceField(choices=LanguageChoices.choices)
     is_base_language = serializers.BooleanField(default=False)
@@ -26,6 +27,7 @@ class ProjectLanguageListOutputSerializer(serializers.Serializer):
 # ----------------------
 # Project
 # ----------------------
+
 
 class ProjectCreateInputSerializer(serializers.Serializer):
     slug = serializers.SlugField(max_length=100)
@@ -61,6 +63,7 @@ class ProjectDetailOutputSerializer(serializers.Serializer):
 # ----------------------
 # Export
 # ----------------------
+
 
 class ProjectExportFilterSerializer(serializers.Serializer):
     lang = serializers.ChoiceField(

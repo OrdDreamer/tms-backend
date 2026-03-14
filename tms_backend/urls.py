@@ -17,17 +17,15 @@ urlpatterns = [
     path(
         "api/v1/auth/token/",
         TokenObtainPairView.as_view(throttle_classes=[LoginRateThrottle]),
-        name="token-obtain-pair"
+        name="token-obtain-pair",
     ),
     path(
         "api/v1/auth/token/refresh/",
         TokenRefreshView.as_view(),
-        name="token-refresh"
+        name="token-refresh",
     ),
     path(
-        "api/v1/auth/logout/",
-        UserLogoutAPIView.as_view(),
-        name="auth-logout"
+        "api/v1/auth/logout/", UserLogoutAPIView.as_view(), name="auth-logout"
     ),
     path("api/", include("apps.core.urls")),
     path("api/v1/projects/", include("apps.projects.urls")),

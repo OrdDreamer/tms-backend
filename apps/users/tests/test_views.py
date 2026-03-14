@@ -45,7 +45,8 @@ class TestUserListView:
     def test_search(self, authenticated_client, user):
         UserFactory(email="searchme@example.com", first_name="Findable")
         response = authenticated_client.get(
-            reverse("users:user-list"), {"search": "Findable"},
+            reverse("users:user-list"),
+            {"search": "Findable"},
         )
         assert response.data["count"] == 1
 

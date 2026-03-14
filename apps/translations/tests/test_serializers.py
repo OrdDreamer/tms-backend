@@ -3,7 +3,6 @@ from apps.translations.serializers import (
     TranslationKeyBulkDeleteInputSerializer,
     TranslationKeyCreateInputSerializer,
     TranslationKeyListFilterSerializer,
-    TranslationKeyUpdateInputSerializer,
     TranslationValueCreateInputSerializer,
 )
 
@@ -14,10 +13,12 @@ class TestTranslationKeyCreateInputSerializer:
         assert s.is_valid()
 
     def test_with_translations(self):
-        s = TranslationKeyCreateInputSerializer(data={
-            "key": "common.hello",
-            "translations": {"en": "Hello", "uk": "Привіт"},
-        })
+        s = TranslationKeyCreateInputSerializer(
+            data={
+                "key": "common.hello",
+                "translations": {"en": "Hello", "uk": "Привіт"},
+            }
+        )
         assert s.is_valid()
         assert "en" in s.validated_data["translations"]
 

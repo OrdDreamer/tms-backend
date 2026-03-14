@@ -4,6 +4,7 @@ Usage:
     python manage.py seed_db          # idempotent seed
     python manage.py seed_db --flush  # wipe seeded data and re-seed
 """
+
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
@@ -131,13 +132,16 @@ class Command(BaseCommand):
         )
         if not created:
             self.stdout.write(
-                f"Project «{project.slug}» already exists — skipped")
+                f"Project «{project.slug}» already exists — skipped"
+            )
             return
 
         base_lang_code, target_lang_codes = None, []
         for lang_code, is_base in cfg["languages"]:
             ProjectLanguage.objects.create(
-                project=project, language=lang_code, is_base_language=is_base,
+                project=project,
+                language=lang_code,
+                is_base_language=is_base,
             )
             if is_base:
                 base_lang_code = lang_code
@@ -146,15 +150,21 @@ class Command(BaseCommand):
 
         keys_data = cfg["keys"]
 
-        tk_objects = TranslationKey.objects.bulk_create([
-            TranslationKey(
-                key=key, project=project, description=desc,
-            )
-            for key, desc, _en_value in keys_data
-        ])
+        tk_objects = TranslationKey.objects.bulk_create(
+            [
+                TranslationKey(
+                    key=key,
+                    project=project,
+                    description=desc,
+                )
+                for key, desc, _en_value in keys_data
+            ]
+        )
 
         tv_objects = []
-        for tk_obj, (key, _desc, en_value) in zip(tk_objects, keys_data):
+        for tk_obj, (_key, _desc, en_value) in zip(
+            tk_objects, keys_data, strict=False
+        ):
             tv_objects.append(
                 TranslationValue(
                     translation_key=tk_obj,

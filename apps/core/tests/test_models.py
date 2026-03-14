@@ -1,6 +1,7 @@
 import uuid
 
 import pytest
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from apps.projects.models import Project
@@ -27,9 +28,10 @@ class TestBaseModel:
 
     def test_full_clean_called_on_save(self):
         project = Project(slug="!invalid slug!", name="Test")
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             project.save()
 
     def test_abstract_model_not_in_db(self):
         from apps.core.models import BaseModel
+
         assert BaseModel._meta.abstract is True

@@ -1,4 +1,3 @@
-import pytest
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework.test import APIRequestFactory
 
@@ -40,6 +39,7 @@ class TestCustomExceptionHandler:
 
     def test_drf_error_wrapped(self):
         from rest_framework.exceptions import NotFound
+
         exc = NotFound("Not found")
         response = custom_exception_handler(exc, self._get_context())
         assert response.status_code == 404

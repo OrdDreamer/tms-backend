@@ -11,11 +11,12 @@ class ProjectAdmin(admin.ModelAdmin):
 
     Defines list display, search fields, filters.
     """
+
     list_display = (
         "slug",
         "name",
         "display_base_language",
-        "display_all_languages"
+        "display_all_languages",
     )
     search_fields = ("slug", "name")
     list_filter = ("languages__language",)
@@ -27,13 +28,15 @@ class ProjectAdmin(admin.ModelAdmin):
     def display_base_language(self, obj):
         base_language = next(
             (lang for lang in obj.languages.all() if lang.is_base_language),
-            None
+            None,
         )
         return (
-            (f"{base_language.get_language_display()} "
-             f"({base_language.language})")
-            if base_language else
-            "-"
+            (
+                f"{base_language.get_language_display()} "
+                f"({base_language.language})"
+            )
+            if base_language
+            else "-"
         )
 
     display_base_language.short_description = "Base Language"
@@ -52,14 +55,11 @@ class ProjectLanguageAdmin(admin.ModelAdmin):
 
     Allows managing project languages independently with filtering and search.
     """
+
     list_display = ("project", "display_language", "is_base_language")
     search_fields = ["project__slug", "project__name", "language"]
 
-    list_filter = (
-        "is_base_language",
-        "project",
-        "language"
-    )
+    list_filter = ("is_base_language", "project", "language")
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)

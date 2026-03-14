@@ -3,7 +3,7 @@ from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.token_blacklist.models import (
     BlacklistedToken,
-    OutstandingToken
+    OutstandingToken,
 )
 
 from apps.core.exceptions import AuthError
@@ -19,16 +19,14 @@ def _blacklist_all_tokens_for_user(*, user) -> None:
 def user_logout(*, refresh_token: str) -> None:
     try:
         token = RefreshToken(refresh_token)  # type: ignore
-    except TokenError:
-        raise AuthError("Invalid or expired refresh token.")
+    except TokenError as err:
+        raise AuthError("Invalid or expired refresh token.") from err
     token.blacklist()
 
 
 def user_create(*, email, password, **extra_fields):
     return User.objects.create_user(
-        email=email,
-        password=password,
-        **extra_fields
+        email=email, password=password, **extra_fields
     )
 
 

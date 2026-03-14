@@ -12,8 +12,12 @@ from apps.translations.utils import (
 @pytest.fixture
 def project_with_langs(db):
     project = ProjectFactory(slug="view-proj")
-    ProjectLanguageFactory(project=project, language="en", is_base_language=True)
-    ProjectLanguageFactory(project=project, language="uk", is_base_language=False)
+    ProjectLanguageFactory(
+        project=project, language="en", is_base_language=True
+    )
+    ProjectLanguageFactory(
+        project=project, language="uk", is_base_language=False
+    )
     return project
 
 
@@ -38,15 +42,20 @@ class TestTranslationKeyListCreateView:
         assert response.status_code == status.HTTP_200_OK
         assert response.data["count"] == 1
 
-    def test_list_with_translations(self, authenticated_client, key_with_values):
+    def test_list_with_translations(
+        self, authenticated_client, key_with_values
+    ):
         response = authenticated_client.get(self._url())
         result = response.data["results"][0]
         assert "translations" in result
         assert result["translations"]["en"] == "Hello"
 
-    def test_list_without_translations(self, authenticated_client, key_with_values):
+    def test_list_without_translations(
+        self, authenticated_client, key_with_values
+    ):
         response = authenticated_client.get(
-            self._url(), {"include_translations": "false"},
+            self._url(),
+            {"include_translations": "false"},
         )
         result = response.data["results"][0]
         assert "translations" not in result
@@ -66,7 +75,9 @@ class TestTranslationKeyListCreateView:
         assert response.status_code == status.HTTP_201_CREATED
         assert response.data["key"] == "new.key"
 
-    def test_create_key_with_translations(self, authenticated_client, project_with_langs):
+    def test_create_key_with_translations(
+        self, authenticated_client, project_with_langs
+    ):
         response = authenticated_client.post(
             self._url(),
             {
@@ -78,12 +89,19 @@ class TestTranslationKeyListCreateView:
         assert response.status_code == status.HTTP_201_CREATED
         assert response.data["translations"]["en"] == "Hello"
 
-    def test_untranslated_filter(self, authenticated_client, project_with_langs):
-        tk1 = translation_key_create(project=project_with_langs, key="common.hello")
-        translation_value_create(translation_key=tk1, language="en", value="Hello")
+    def test_untranslated_filter(
+        self, authenticated_client, project_with_langs
+    ):
+        tk1 = translation_key_create(
+            project=project_with_langs, key="common.hello"
+        )
+        translation_value_create(
+            translation_key=tk1, language="en", value="Hello"
+        )
         translation_key_create(project=project_with_langs, key="common.bye")
         response = authenticated_client.get(
-            self._url(), {"lang": "en", "untranslated": "true"},
+            self._url(),
+            {"lang": "en", "untranslated": "true"},
         )
         assert response.data["count"] == 1
         assert response.data["results"][0]["key"] == "common.bye"
@@ -171,8 +189,10 @@ class TestTranslationDetailView:
             },
         )
 
-    def test_create_translation(self, authenticated_client, project_with_langs):
-        tk = translation_key_create(project=project_with_langs, key="new.key")
+    def test_create_translation(
+        self, authenticated_client, project_with_langs
+    ):
+        translation_key_create(project=project_with_langs, key="new.key")
         response = authenticated_client.put(
             self._url("new.key", "en"),
             {"value": "Hello"},
@@ -194,7 +214,9 @@ class TestTranslationDetailView:
         response = authenticated_client.delete(self._url("common.hello", "en"))
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
-    def test_put_empty_value_deletes(self, authenticated_client, key_with_values):
+    def test_put_empty_value_deletes(
+        self, authenticated_client, key_with_values
+    ):
         response = authenticated_client.put(
             self._url("common.hello", "en"),
             {"value": ""},
@@ -244,4 +266,5 @@ class TestPublicProjectTranslationsView:
 
     def test_throttle_config(self):
         from apps.translations.views import PublicProjectTranslationsAPIView
+
         assert PublicProjectTranslationsAPIView.throttle_scope == "public_api"

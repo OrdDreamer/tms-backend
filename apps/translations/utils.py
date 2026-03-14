@@ -52,7 +52,8 @@ def _validate_key_no_nesting_conflict(*, project, key, exclude_id=None):
     ancestor_keys = [".".join(parts[:i]) for i in range(1, len(parts))]
     if ancestor_keys:
         conflicts = list(
-            qs.filter(key__in=ancestor_keys).values_list("key", flat=True))
+            qs.filter(key__in=ancestor_keys).values_list("key", flat=True)
+        )
         if conflicts:
             raise TranslationError(
                 f"Key '{key}' conflicts with an existing parent key.",
@@ -60,7 +61,8 @@ def _validate_key_no_nesting_conflict(*, project, key, exclude_id=None):
             )
 
     conflicts = list(
-        qs.filter(key__startswith=f"{key}.").values_list("key", flat=True))
+        qs.filter(key__startswith=f"{key}.").values_list("key", flat=True)
+    )
     if conflicts:
         raise TranslationError(
             f"Key '{key}' conflicts with existing nested keys.",
@@ -245,9 +247,9 @@ def translation_value_bulk_update(*, translation_key, values_data):
     languages = [item["language"] for item in values_data]
 
     project_languages = set(
-        ProjectLanguage.objects
-        .filter(project=translation_key.project, language__in=languages)
-        .values_list("language", flat=True)
+        ProjectLanguage.objects.filter(
+            project=translation_key.project, language__in=languages
+        ).values_list("language", flat=True)
     )
 
     invalid_languages = set(languages) - project_languages
@@ -282,11 +284,13 @@ def translation_value_bulk_update(*, translation_key, values_data):
                 to_delete_ids.append(existing[language].id)
         else:
             if value:
-                to_create.append(TranslationValue(
-                    translation_key=translation_key,
-                    language=language,
-                    value=value,
-                ))
+                to_create.append(
+                    TranslationValue(
+                        translation_key=translation_key,
+                        language=language,
+                        value=value,
+                    )
+                )
 
     created = []
     if to_create:
@@ -297,8 +301,7 @@ def translation_value_bulk_update(*, translation_key, values_data):
         for tv in to_update:
             tv.updated_at = now
         TranslationValue.objects.bulk_update(
-            to_update,
-            ["value", "updated_at"]
+            to_update, ["value", "updated_at"]
         )
 
     deleted_count = 0
@@ -316,11 +319,7 @@ def translation_value_bulk_update(*, translation_key, values_data):
 
 @transaction.atomic
 def translation_key_create_with_values(
-        *,
-        project,
-        key,
-        description="",
-        values_data
+    *, project, key, description="", values_data
 ):
     """
     Create a translation key and its values in a single transaction.
@@ -383,8 +382,9 @@ def translation_key_bulk_delete(*, project, key_names):
     return deleted_count
 
 
-def project_translations_export(*, project, language=None,
-                                export_format="flat"):
+def project_translations_export(
+    *, project, language=None, export_format="flat"
+):
     """
     Export translations for a project.
 
@@ -410,9 +410,7 @@ def project_translations_export(*, project, language=None,
     Raises:
         TranslationError — if language is not configured for the project.
     """
-    project_langs = list(
-        project.languages.values_list("language", flat=True)
-    )
+    project_langs = list(project.languages.values_list("language", flat=True))
 
     if language:
         if language not in project_langs:
@@ -426,20 +424,15 @@ def project_translations_export(*, project, language=None,
         target_langs = sorted(project_langs)
 
     all_keys = list(
-        TranslationKey.objects
-        .filter(project=project)
+        TranslationKey.objects.filter(project=project)
         .order_by("key")
         .values_list("key", flat=True)
     )
 
-    existing = (
-        TranslationValue.objects
-        .filter(
-            translation_key__project=project,
-            language__in=target_langs,
-        )
-        .select_related("translation_key")
-    )
+    existing = TranslationValue.objects.filter(
+        translation_key__project=project,
+        language__in=target_langs,
+    ).select_related("translation_key")
 
     value_map = {}
     for tv in existing:

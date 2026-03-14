@@ -27,20 +27,26 @@ class TestProjectLanguageModel:
         pl = ProjectLanguageFactory(language="en")
         with pytest.raises(ValidationError):
             dup = ProjectLanguage(
-                project=pl.project, language="en", is_base_language=False,
+                project=pl.project,
+                language="en",
+                is_base_language=False,
             )
             dup.full_clean()
 
     def test_clean_no_base_language_raises(self):
         project = ProjectFactory()
-        pl = ProjectLanguage(project=project, language="en", is_base_language=False)
+        pl = ProjectLanguage(
+            project=project, language="en", is_base_language=False
+        )
         with pytest.raises(ValidationError):
             pl.clean()
 
     def test_clean_passes_when_base_exists(self):
         pl = ProjectLanguageFactory(language="en", is_base_language=True)
         new_pl = ProjectLanguage(
-            project=pl.project, language="uk", is_base_language=False,
+            project=pl.project,
+            language="uk",
+            is_base_language=False,
         )
         new_pl.clean()  # should not raise
 

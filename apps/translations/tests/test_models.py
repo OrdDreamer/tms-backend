@@ -3,7 +3,6 @@ from django.core.exceptions import ValidationError
 
 from apps.factories import (
     ProjectFactory,
-    ProjectLanguageFactory,
     TranslationKeyFactory,
     TranslationValueFactory,
 )
@@ -12,26 +11,32 @@ from apps.translations.models import TranslationKey, TranslationValue
 
 @pytest.mark.django_db
 class TestTranslationKeyModel:
-    @pytest.mark.parametrize("key", [
-        "common.hello",
-        "api.v1.endpoint",
-        "form.submit_button",
-        "a.b",
-        "section1.key2",
-    ])
+    @pytest.mark.parametrize(
+        "key",
+        [
+            "common.hello",
+            "api.v1.endpoint",
+            "form.submit_button",
+            "a.b",
+            "section1.key2",
+        ],
+    )
     def test_valid_keys(self, key):
         project = ProjectFactory()
         tk = TranslationKey(project=project, key=key)
         tk.full_clean()  # should not raise
 
-    @pytest.mark.parametrize("key", [
-        "UPPER.CASE",
-        "has spaces",
-        ".leading.dot",
-        "trailing.dot.",
-        "special!char",
-        "",
-    ])
+    @pytest.mark.parametrize(
+        "key",
+        [
+            "UPPER.CASE",
+            "has spaces",
+            ".leading.dot",
+            "trailing.dot.",
+            "special!char",
+            "",
+        ],
+    )
     def test_invalid_keys(self, key):
         project = ProjectFactory()
         tk = TranslationKey(project=project, key=key)
@@ -65,7 +70,9 @@ class TestTranslationValueModel:
         tk = TranslationKeyFactory()
         TranslationValueFactory(translation_key=tk, language="en")
         with pytest.raises(ValidationError):
-            dup = TranslationValue(translation_key=tk, language="en", value="dup")
+            dup = TranslationValue(
+                translation_key=tk, language="en", value="dup"
+            )
             dup.full_clean()
 
     def test_str(self):

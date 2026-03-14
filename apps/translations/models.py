@@ -6,8 +6,10 @@ from apps.core.models import BaseModel
 
 key_validator = RegexValidator(
     regex=r"^[a-z0-9]+(?:[._][a-z0-9]+)*$",
-    message=('Use lowercase letters and digits separated by "_" or "." '
-             "(e.g., my_code_name, api.v1.endpoint).")
+    message=(
+        'Use lowercase letters and digits separated by "_" or "." '
+        "(e.g., my_code_name, api.v1.endpoint)."
+    ),
 )
 
 KEY_FORMAT_HELP = (
@@ -29,6 +31,7 @@ class TranslationKey(BaseModel):
     - Keys must be at least 2 segments long
     - No flat keys
     """
+
     key = models.CharField(
         max_length=255,
         help_text=KEY_FORMAT_HELP,
@@ -38,18 +41,16 @@ class TranslationKey(BaseModel):
         "projects.Project",
         on_delete=models.CASCADE,
         related_name="translation_keys",
-        help_text="Project this translation key belongs to"
+        help_text="Project this translation key belongs to",
     )
     description = models.TextField(
-        blank=True,
-        help_text="Optional description of the translation key"
+        blank=True, help_text="Optional description of the translation key"
     )
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["key", "project"],
-                name="unique_key_per_project"
+                fields=["key", "project"], name="unique_key_per_project"
             )
         ]
         indexes = [
@@ -86,26 +87,25 @@ class TranslationValue(BaseModel):
         revisited or tightened in the future if stronger referential integrity
         is required at the database level.
     """
+
     translation_key = models.ForeignKey(
         TranslationKey,
         on_delete=models.CASCADE,
         related_name="values",
-        help_text="The translation key this value belongs to"
+        help_text="The translation key this value belongs to",
     )
     language = models.CharField(
         max_length=5,
         choices=LanguageChoices,
-        help_text="Language of the translation (ISO 639-1)"
+        help_text="Language of the translation (ISO 639-1)",
     )
-    value = models.TextField(
-        help_text="Translated text"
-    )
+    value = models.TextField(help_text="Translated text")
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
                 fields=["translation_key", "language"],
-                name="unique_translation_per_language"
+                name="unique_translation_per_language",
             )
         ]
         indexes = [

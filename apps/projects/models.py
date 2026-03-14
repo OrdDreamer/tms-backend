@@ -10,18 +10,17 @@ class Project(BaseModel):
     Represents a project which has a set of translation keys
     and associated languages.
     """
+
     slug = models.SlugField(
         max_length=100,
         unique=True,
-        help_text="Unique identifier for the project used in URLs"
+        help_text="Unique identifier for the project used in URLs",
     )
     name = models.CharField(
-        max_length=255,
-        help_text="Human-readable name of the project"
+        max_length=255, help_text="Human-readable name of the project"
     )
     description = models.TextField(
-        blank=True,
-        help_text="Optional description of the project"
+        blank=True, help_text="Optional description of the project"
     )
 
     class Meta:
@@ -43,21 +42,23 @@ class ProjectLanguage(BaseModel):
     Business logic (adding, removing, setting base language) lives
     in apps.projects.utils.
     """
+
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,
         related_name="languages",
-        help_text="Project this language belongs to"
+        help_text="Project this language belongs to",
     )
     language = models.CharField(
         max_length=5,
         choices=LanguageChoices,
-        help_text="Target language (ISO 639-1)"
+        help_text="Target language (ISO 639-1)",
     )
     is_base_language = models.BooleanField(
         default=False,
-        help_text=("Indicates if this language is the "
-                   "base language of the project")
+        help_text=(
+            "Indicates if this language is the base language of the project"
+        ),
     )
 
     class Meta:
@@ -65,17 +66,17 @@ class ProjectLanguage(BaseModel):
         Each project-language relationship must be unique.
         Only one base language is allowed per project.
         """
+
         constraints = [
             models.UniqueConstraint(
-                fields=["project", "language"],
-                name="unique_project_language"
+                fields=["project", "language"], name="unique_project_language"
             ),
             # Requires SQLite 3.8.0+ and Django 3.2+
             # (partial indexes support)
             models.UniqueConstraint(
                 fields=["project"],
                 condition=models.Q(is_base_language=True),
-                name="unique_base_language_per_project"
+                name="unique_base_language_per_project",
             ),
         ]
         ordering = ["project__name", "language"]
@@ -89,16 +90,19 @@ class ProjectLanguage(BaseModel):
         if not self.project:
             return
 
-        base_language_does_not_exist = not ProjectLanguage.objects.filter(
-            project=self.project,
-            is_base_language=True
-        ).exclude(pk=self.pk).exists()
+        base_language_does_not_exist = (
+            not ProjectLanguage.objects.filter(
+                project=self.project, is_base_language=True
+            )
+            .exclude(pk=self.pk)
+            .exists()
+        )
         current_instance_is_not_base = not self.is_base_language
 
         if base_language_does_not_exist and current_instance_is_not_base:
             raise ValidationError(
-                ("This project does not have a base language set. "
-                 "Please set a base language")
+                "This project does not have a base language set. "
+                "Please set a base language"
             )
 
     def __repr__(self):

@@ -17,6 +17,7 @@ class TranslationKeyAdmin(admin.ModelAdmin):
 
     Defines list display, search, filter by project. Inline translation values.
     """
+
     list_display = ("key", "project", "display_description")
     search_fields = ("key", "project__slug", "project__name")
     list_filter = ("project",)
@@ -26,9 +27,12 @@ class TranslationKeyAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {"fields": ("id", "key", "project", "description")}),
-        ("Timestamps", {
-            "fields": ("created_at", "updated_at"),
-        }),
+        (
+            "Timestamps",
+            {
+                "fields": ("created_at", "updated_at"),
+            },
+        ),
     )
 
     def get_queryset(self, request):
@@ -48,8 +52,12 @@ class TranslationValueAdmin(admin.ModelAdmin):
 
     Defines list display, search, filters by language and project.
     """
-    list_display = ("display_translation_key", "language",
-                    "display_value_preview")
+
+    list_display = (
+        "display_translation_key",
+        "language",
+        "display_value_preview",
+    )
     search_fields = (
         "translation_key__key",
         "translation_key__project__slug",
@@ -61,9 +69,12 @@ class TranslationValueAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {"fields": ("id", "translation_key", "language", "value")}),
-        ("Timestamps", {
-            "fields": ("created_at", "updated_at"),
-        }),
+        (
+            "Timestamps",
+            {
+                "fields": ("created_at", "updated_at"),
+            },
+        ),
     )
 
     def get_queryset(self, request):

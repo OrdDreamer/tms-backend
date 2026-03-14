@@ -2,7 +2,6 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -109,10 +108,12 @@ class UserChangePasswordAPIView(APIView):
             new_password=serializer.validated_data["new_password"],
         )
         refresh = RefreshToken.for_user(user)
-        return Response({
-            "access": str(refresh.access_token),
-            "refresh": str(refresh),
-        })
+        return Response(
+            {
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+            }
+        )
 
 
 class UserMeAPIView(APIView):

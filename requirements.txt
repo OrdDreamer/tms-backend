@@ -10,7 +10,5 @@ django-cors-headers==4.9.0
 gunicorn==23.0.0
 
 # Formatting and linting tools
-flake8==5.0.4
-flake8-quotes==3.3.1
-flake8-variables-names==0.0.5
-pep8-naming==0.13.2
+ruff==0.9.10
+pre-commit==4.2.0

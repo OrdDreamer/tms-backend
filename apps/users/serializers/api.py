@@ -5,6 +5,7 @@ from rest_framework import serializers
 # User
 # ----------------------
 
+
 class UserListFilterSerializer(serializers.Serializer):
     search = serializers.CharField(required=False)
 

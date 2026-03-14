@@ -15,7 +15,10 @@ class HealthCheckAPIView(APIView):
 
     @extend_schema(
         summary="Health check",
-        responses={200: HealthCheckOutputSerializer, 503: HealthCheckOutputSerializer},
+        responses={
+            200: HealthCheckOutputSerializer,
+            503: HealthCheckOutputSerializer,
+        },
         tags=["Infrastructure"],
     )
     def get(self, request):
@@ -28,8 +31,10 @@ class HealthCheckAPIView(APIView):
             db_status = "unavailable"
             http_status = status.HTTP_503_SERVICE_UNAVAILABLE
 
-        output = HealthCheckOutputSerializer({
-            "status": "ok" if http_status == 200 else "error",
-            "db": db_status,
-        })
+        output = HealthCheckOutputSerializer(
+            {
+                "status": "ok" if http_status == 200 else "error",
+                "db": db_status,
+            }
+        )
         return Response(output.data, status=http_status)

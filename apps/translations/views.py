@@ -45,15 +45,17 @@ def _get_project(project_slug):
 
 def _get_translation_key(project_slug, key_name):
     return get_object_or_404(
-        TranslationKey, key=key_name, project__slug=project_slug,
+        TranslationKey,
+        key=key_name,
+        project__slug=project_slug,
     )
 
 
 def _get_project_languages(project):
     return set(
-        ProjectLanguage.objects
-        .filter(project=project)
-        .values_list("language", flat=True)
+        ProjectLanguage.objects.filter(project=project).values_list(
+            "language", flat=True
+        )
     )
 
 
@@ -113,7 +115,8 @@ class TranslationKeyListCreateAPIView(APIView):
         filters.is_valid(raise_exception=True)
 
         include_translations = filters.validated_data.get(
-            "include_translations", True,
+            "include_translations",
+            True,
         )
 
         qs = TranslationKey.objects.filter(project=project)
@@ -130,7 +133,8 @@ class TranslationKeyListCreateAPIView(APIView):
         if lang and untranslated:
             qs = qs.annotate(
                 lang_count=Count(
-                    "values", filter=Q(values__language=lang),
+                    "values",
+                    filter=Q(values__language=lang),
                 ),
             ).filter(lang_count=0)
         elif lang:
@@ -140,7 +144,8 @@ class TranslationKeyListCreateAPIView(APIView):
         page = paginator.paginate_queryset(qs, request)
 
         serializer = TranslationKeyListOutputSerializer(
-            page, many=True,
+            page,
+            many=True,
             context={
                 "project_languages": project_languages,
                 "include_translations": include_translations,
@@ -179,11 +184,13 @@ class TranslationKeyListCreateAPIView(APIView):
             tk = result["translation_key"]
         else:
             tk = translation_key_create(
-                project=project, **serializer.validated_data,
+                project=project,
+                **serializer.validated_data,
             )
 
         output = TranslationKeyDetailOutputSerializer(
-            tk, context={"project_languages": project_languages},
+            tk,
+            context={"project_languages": project_languages},
         )
         return Response(output.data, status=status.HTTP_201_CREATED)
 
@@ -199,7 +206,8 @@ class TranslationKeyDetailAPIView(APIView):
         project_languages = _get_project_languages(tk.project)
 
         output = TranslationKeyDetailOutputSerializer(
-            tk, context={"project_languages": project_languages},
+            tk,
+            context={"project_languages": project_languages},
         )
         return Response(output.data)
 
@@ -217,11 +225,13 @@ class TranslationKeyDetailAPIView(APIView):
         serializer.is_valid(raise_exception=True)
 
         tk = translation_key_update(
-            translation_key=tk, **serializer.validated_data,
+            translation_key=tk,
+            **serializer.validated_data,
         )
 
         output = TranslationKeyDetailOutputSerializer(
-            tk, context={"project_languages": project_languages},
+            tk,
+            context={"project_languages": project_languages},
         )
         return Response(output.data)
 
@@ -252,7 +262,8 @@ class TranslationKeyBulkDeleteAPIView(APIView):
         serializer.is_valid(raise_exception=True)
 
         deleted_count = translation_key_bulk_delete(
-            project=project, key_names=serializer.validated_data["keys"],
+            project=project,
+            key_names=serializer.validated_data["keys"],
         )
         return Response(
             {"deleted_count": deleted_count},
@@ -297,7 +308,8 @@ class TranslationListAPIView(APIView):
         ]
 
         result = translation_value_bulk_update(
-            translation_key=tk, values_data=values_data,
+            translation_key=tk,
+            values_data=values_data,
         )
 
         all_values = result["created"] + result["updated"]
@@ -319,7 +331,8 @@ class TranslationDetailAPIView(APIView):
         serializer.is_valid(raise_exception=True)
 
         existing = TranslationValue.objects.filter(
-            translation_key=tk, language=lang_code,
+            translation_key=tk,
+            language=lang_code,
         ).first()
 
         if existing:
@@ -397,7 +410,8 @@ class PublicProjectTranslationsAPIView(APIView):
 
         language = serializer.validated_data.get("lang")
         export_format = serializer.validated_data.get(
-            "export_format", "flat",
+            "export_format",
+            "flat",
         )
 
         etag = self._compute_etag(project, language, export_format)
@@ -431,7 +445,8 @@ class PublicProjectTranslationsAPIView(APIView):
         if language:
             value_qs = value_qs.filter(language=language)
         value_stats = value_qs.aggregate(
-            latest=Max("updated_at"), total=Count("id"),
+            latest=Max("updated_at"),
+            total=Count("id"),
         )
 
         lang_stats = ProjectLanguage.objects.filter(
@@ -439,7 +454,8 @@ class PublicProjectTranslationsAPIView(APIView):
         ).aggregate(latest=Max("updated_at"), total=Count("id"))
 
         timestamps = [
-            ts for ts in [
+            ts
+            for ts in [
                 key_stats["latest"],
                 value_stats["latest"],
                 lang_stats["latest"],
@@ -449,9 +465,9 @@ class PublicProjectTranslationsAPIView(APIView):
         ts_str = max(timestamps).isoformat() if timestamps else "empty"
 
         raw = (
-            f"{project.slug}: {language or "all"}: {export_format}"
+            f"{project.slug}: {language or 'all'}: {export_format}"
             f": {ts_str}"
-            f": {key_stats["total"]}: {value_stats["total"]}"
-            f": {lang_stats["total"]}"
+            f": {key_stats['total']}: {value_stats['total']}"
+            f": {lang_stats['total']}"
         )
         return f'"{hashlib.md5(raw.encode()).hexdigest()}"'

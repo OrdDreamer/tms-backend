@@ -2,7 +2,7 @@ from apps.factories.users import UserFactory
 from apps.factories.projects import ProjectFactory, ProjectLanguageFactory
 from apps.factories.translations import (
     TranslationKeyFactory,
-    TranslationValueFactory
+    TranslationValueFactory,
 )
 
 __all__ = [

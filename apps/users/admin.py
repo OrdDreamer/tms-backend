@@ -12,6 +12,7 @@ class UserAdmin(BaseUserAdmin):
     Displays email, first_name, last_name, and permission fields.
     Provides search by email and name fields.
     """
+
     list_display = (
         "id",
         "email",
@@ -19,7 +20,7 @@ class UserAdmin(BaseUserAdmin):
         "last_name",
         "is_staff",
         "is_superuser",
-        "is_active"
+        "is_active",
     )
     search_fields = ("email", "first_name", "last_name")
     ordering = ("email",)
@@ -27,27 +28,33 @@ class UserAdmin(BaseUserAdmin):
 
     fieldsets = (
         (None, {"fields": ("email", "first_name", "last_name", "password")}),
-        ("Permissions", {
-            "fields": (
-                "is_staff",
-                "is_superuser",
-                "is_active",
-                "groups",
-                "user_permissions"
-            )
-        }),
+        (
+            "Permissions",
+            {
+                "fields": (
+                    "is_staff",
+                    "is_superuser",
+                    "is_active",
+                    "groups",
+                    "user_permissions",
+                )
+            },
+        ),
         ("Important dates", {"fields": ("last_login", "date_joined")}),
     )
 
     add_fieldsets = (
-        (None, {
-            "classes": ("wide",),
-            "fields": (
-                "email",
-                "first_name",
-                "last_name",
-                "password1",
-                "password2"
-            ),
-        }),
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": (
+                    "email",
+                    "first_name",
+                    "last_name",
+                    "password1",
+                    "password2",
+                ),
+            },
+        ),
     )

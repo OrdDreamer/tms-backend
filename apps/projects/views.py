@@ -139,7 +139,8 @@ class ProjectLanguageListCreateAPIView(APIView):
         serializer.is_valid(raise_exception=True)
 
         project_language = project_language_add(
-            project=project, **serializer.validated_data,
+            project=project,
+            **serializer.validated_data,
         )
 
         output = ProjectLanguageListOutputSerializer(project_language)

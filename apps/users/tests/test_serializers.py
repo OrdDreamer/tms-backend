@@ -1,5 +1,3 @@
-import pytest
-
 from apps.users.serializers import (
     UserChangePasswordInputSerializer,
     UserLogoutInputSerializer,

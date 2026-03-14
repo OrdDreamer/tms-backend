@@ -9,6 +9,7 @@ class ValidationError(ApplicationError):
     """
     Exception raised when a validation error occurs.
     """
+
     pass
 
 
@@ -16,6 +17,7 @@ class PermissionError(ApplicationError):
     """
     Exception raised when a user does not have permission to perform an action.
     """
+
     pass
 
 
@@ -23,6 +25,7 @@ class ProjectError(ApplicationError):
     """
     Exception raised when a project-related operation fails.
     """
+
     pass
 
 
@@ -30,6 +33,7 @@ class TranslationError(ApplicationError):
     """
     Exception raised when a translation-related operation fails.
     """
+
     pass
 
 
@@ -37,4 +41,5 @@ class AuthError(ApplicationError):
     """
     Exception raised when an authentication-related operation fails.
     """
+
     pass

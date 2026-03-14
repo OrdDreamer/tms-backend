@@ -20,6 +20,7 @@ class CustomUserManager(BaseUserManager):
     - Superusers always have is_staff=True and is_superuser=True.
     - Email-based authentication behaves consistently.
     """
+
     def _create_user(self, email, password, **extra_fields):
         if not email:
             raise ValueError("The Email field must be set")
@@ -61,6 +62,7 @@ class User(AbstractUser):
     Represents a user in the system with email as the unique identifier.
     Username field is not used.
     """
+
     username = None
     email = models.EmailField(
         unique=True,

@@ -15,18 +15,27 @@ def custom_exception_handler(exc, context):
 
     if isinstance(exc, Throttled):
         wait = int(exc.wait) if exc.wait else None
-        msg = f"Too many requests. Retry in {wait}s." if wait else "Too many requests."
+        msg = (
+            f"Too many requests. Retry in {wait}s."
+            if wait
+            else "Too many requests."
+        )
         return Response({"message": msg, "extra": {}}, status=429)
 
     # Handle Django validation errors (400 — normal behaviour, no logging)
     if isinstance(exc, DjangoValidationError):
-        data = exc.message_dict if hasattr(exc, "message_dict") else {
-            "non_field_errors": exc.messages
-        }
-        return Response({
-            "message": "Validation error",
-            "extra": data,
-        }, status=400)
+        data = (
+            exc.message_dict
+            if hasattr(exc, "message_dict")
+            else {"non_field_errors": exc.messages}
+        )
+        return Response(
+            {
+                "message": "Validation error",
+                "extra": data,
+            },
+            status=400,
+        )
 
     if isinstance(exc, ApplicationError):
         logger.warning(
@@ -34,10 +43,13 @@ def custom_exception_handler(exc, context):
             exc.message,
             exc.extra,
         )
-        return Response({
-            "message": exc.message,
-            "extra": exc.extra,
-        }, status=400)
+        return Response(
+            {
+                "message": exc.message,
+                "extra": exc.extra,
+            },
+            status=400,
+        )
 
     # Default DRF handling
     response = exception_handler(exc, context)

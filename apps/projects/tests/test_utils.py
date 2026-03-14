@@ -2,7 +2,7 @@ import pytest
 from django.core.exceptions import ValidationError
 
 from apps.core.exceptions import ProjectError
-from apps.factories import ProjectFactory, ProjectLanguageFactory
+from apps.factories import ProjectFactory
 from apps.projects.models import ProjectLanguage
 from apps.projects.utils import (
     project_create,
@@ -28,7 +28,9 @@ class TestProjectCreate:
             project_create(slug="dup", name="Second")
 
     def test_with_description(self):
-        project = project_create(slug="desc", name="Desc", description="A description")
+        project = project_create(
+            slug="desc", name="Desc", description="A description"
+        )
         assert project.description == "A description"
 
 
@@ -57,6 +59,7 @@ class TestProjectDelete:
         pk = project.pk
         project_delete(project=project)
         from apps.projects.models import Project
+
         assert not Project.objects.filter(pk=pk).exists()
 
 
@@ -76,7 +79,9 @@ class TestProjectLanguageAdd:
     def test_add_as_base_demotes_old(self):
         project = ProjectFactory()
         en = project_language_add(project=project, language="en")
-        uk = project_language_add(project=project, language="uk", is_base_language=True)
+        uk = project_language_add(
+            project=project, language="uk", is_base_language=True
+        )
         en.refresh_from_db()
         assert en.is_base_language is False
         assert uk.is_base_language is True

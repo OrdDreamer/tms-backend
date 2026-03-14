@@ -22,12 +22,16 @@ from apps.translations.utils import (
 @pytest.mark.django_db
 class TestTranslationKeyCreate:
     def test_creates_key(self, project_with_langs):
-        tk = translation_key_create(project=project_with_langs, key="common.hello")
+        tk = translation_key_create(
+            project=project_with_langs, key="common.hello"
+        )
         assert tk.key == "common.hello"
         assert tk.project == project_with_langs
 
     def test_auto_lowercases(self, project_with_langs):
-        tk = translation_key_create(project=project_with_langs, key="COMMON.HELLO")
+        tk = translation_key_create(
+            project=project_with_langs, key="COMMON.HELLO"
+        )
         assert tk.key == "common.hello"
 
     def test_nesting_conflict_parent_exists(self, project_with_langs):
@@ -42,12 +46,16 @@ class TestTranslationKeyCreate:
 
     def test_sibling_keys_ok(self, project_with_langs):
         translation_key_create(project=project_with_langs, key="menu.file")
-        tk = translation_key_create(project=project_with_langs, key="menu.edit")
+        tk = translation_key_create(
+            project=project_with_langs, key="menu.edit"
+        )
         assert tk.key == "menu.edit"
 
     def test_with_description(self, project_with_langs):
         tk = translation_key_create(
-            project=project_with_langs, key="common.hello", description="Greeting",
+            project=project_with_langs,
+            key="common.hello",
+            description="Greeting",
         )
         assert tk.description == "Greeting"
 
@@ -56,13 +64,15 @@ class TestTranslationKeyCreate:
 class TestTranslationKeyUpdate:
     def test_update_key(self, translation_key):
         updated = translation_key_update(
-            translation_key=translation_key, key="common.goodbye",
+            translation_key=translation_key,
+            key="common.goodbye",
         )
         assert updated.key == "common.goodbye"
 
     def test_update_description(self, translation_key):
         updated = translation_key_update(
-            translation_key=translation_key, description="Updated desc",
+            translation_key=translation_key,
+            description="Updated desc",
         )
         assert updated.description == "Updated desc"
 
@@ -71,7 +81,9 @@ class TestTranslationKeyUpdate:
         assert result == translation_key
 
     def test_rename_no_self_conflict(self, project_with_langs):
-        tk = translation_key_create(project=project_with_langs, key="menu.item")
+        tk = translation_key_create(
+            project=project_with_langs, key="menu.item"
+        )
         updated = translation_key_update(translation_key=tk, key="menu.item2")
         assert updated.key == "menu.item2"
 
@@ -85,7 +97,9 @@ class TestTranslationKeyDelete:
 
     def test_cascade_deletes_values(self, translation_key):
         TranslationValueFactory(
-            translation_key=translation_key, language="en", value="Hello",
+            translation_key=translation_key,
+            language="en",
+            value="Hello",
         )
         translation_key_delete(translation_key=translation_key)
         assert not TranslationValue.objects.filter(
@@ -97,7 +111,9 @@ class TestTranslationKeyDelete:
 class TestTranslationValueCreate:
     def test_creates_value(self, translation_key):
         tv = translation_value_create(
-            translation_key=translation_key, language="en", value="Hello",
+            translation_key=translation_key,
+            language="en",
+            value="Hello",
         )
         assert tv.value == "Hello"
         assert tv.language == "en"
@@ -105,7 +121,9 @@ class TestTranslationValueCreate:
     def test_invalid_language_raises(self, translation_key):
         with pytest.raises(TranslationError, match="not configured"):
             translation_value_create(
-                translation_key=translation_key, language="de", value="Hallo",
+                translation_key=translation_key,
+                language="de",
+                value="Hallo",
             )
 
 
@@ -113,14 +131,18 @@ class TestTranslationValueCreate:
 class TestTranslationValueUpdate:
     def test_updates_value(self, translation_key):
         tv = TranslationValueFactory(
-            translation_key=translation_key, language="en", value="Hello",
+            translation_key=translation_key,
+            language="en",
+            value="Hello",
         )
         result = translation_value_update(translation_value=tv, value="Hi")
         assert result.value == "Hi"
 
     def test_empty_value_deletes(self, translation_key):
         tv = TranslationValueFactory(
-            translation_key=translation_key, language="en", value="Hello",
+            translation_key=translation_key,
+            language="en",
+            value="Hello",
         )
         result = translation_value_update(translation_value=tv, value="")
         assert result is None
@@ -131,7 +153,9 @@ class TestTranslationValueUpdate:
 class TestTranslationValueDelete:
     def test_deletes_value(self, translation_key):
         tv = TranslationValueFactory(
-            translation_key=translation_key, language="en", value="Hello",
+            translation_key=translation_key,
+            language="en",
+            value="Hello",
         )
         translation_value_delete(translation_value=tv)
         assert not TranslationValue.objects.filter(pk=tv.pk).exists()
@@ -149,7 +173,9 @@ class TestTranslationValueBulkUpdate:
 
     def test_updates_existing(self, translation_key):
         TranslationValueFactory(
-            translation_key=translation_key, language="en", value="Old",
+            translation_key=translation_key,
+            language="en",
+            value="Old",
         )
         result = translation_value_bulk_update(
             translation_key=translation_key,
@@ -159,7 +185,9 @@ class TestTranslationValueBulkUpdate:
 
     def test_deletes_on_empty_value(self, translation_key):
         TranslationValueFactory(
-            translation_key=translation_key, language="en", value="Hello",
+            translation_key=translation_key,
+            language="en",
+            value="Hello",
         )
         result = translation_value_bulk_update(
             translation_key=translation_key,
@@ -184,7 +212,9 @@ class TestTranslationValueBulkUpdate:
 
     def test_mixed_operations(self, translation_key):
         TranslationValueFactory(
-            translation_key=translation_key, language="en", value="Old EN",
+            translation_key=translation_key,
+            language="en",
+            value="Old EN",
         )
         result = translation_value_bulk_update(
             translation_key=translation_key,
@@ -228,14 +258,19 @@ class TestTranslationKeyBulkDelete:
         translation_key_create(project=project_with_langs, key="a.two")
         translation_key_create(project=project_with_langs, key="a.three")
         count = translation_key_bulk_delete(
-            project=project_with_langs, key_names=["a.one", "a.two"],
+            project=project_with_langs,
+            key_names=["a.one", "a.two"],
         )
         assert count == 2
-        assert TranslationKey.objects.filter(project=project_with_langs).count() == 1
+        assert (
+            TranslationKey.objects.filter(project=project_with_langs).count()
+            == 1
+        )
 
     def test_ignores_nonexistent(self, project_with_langs):
         count = translation_key_bulk_delete(
-            project=project_with_langs, key_names=["nonexistent.key"],
+            project=project_with_langs,
+            key_names=["nonexistent.key"],
         )
         assert count == 0
 
@@ -244,8 +279,12 @@ class TestTranslationKeyBulkDelete:
 class TestProjectTranslationsExport:
     def _setup_data(self, project):
         tk = translation_key_create(project=project, key="common.hello")
-        translation_value_create(translation_key=tk, language="en", value="Hello")
-        translation_value_create(translation_key=tk, language="uk", value="Привіт")
+        translation_value_create(
+            translation_key=tk, language="en", value="Hello"
+        )
+        translation_value_create(
+            translation_key=tk, language="uk", value="Привіт"
+        )
         return tk
 
     def test_export_flat_all_languages(self, project_with_langs):
@@ -259,25 +298,32 @@ class TestProjectTranslationsExport:
     def test_export_flat_single_language(self, project_with_langs):
         self._setup_data(project_with_langs)
         result = project_translations_export(
-            project=project_with_langs, language="en",
+            project=project_with_langs,
+            language="en",
         )
         assert result["common.hello"] == "Hello"
 
     def test_export_nested(self, project_with_langs):
         self._setup_data(project_with_langs)
         result = project_translations_export(
-            project=project_with_langs, export_format="nested",
+            project=project_with_langs,
+            export_format="nested",
         )
         assert result["en"]["common"]["hello"] == "Hello"
 
     def test_missing_translations_empty_string(self, project_with_langs):
-        tk = translation_key_create(project=project_with_langs, key="common.bye")
-        translation_value_create(translation_key=tk, language="en", value="Bye")
+        tk = translation_key_create(
+            project=project_with_langs, key="common.bye"
+        )
+        translation_value_create(
+            translation_key=tk, language="en", value="Bye"
+        )
         result = project_translations_export(project=project_with_langs)
         assert result["uk"]["common.bye"] == ""
 
     def test_invalid_language_raises(self, project_with_langs):
         with pytest.raises(TranslationError, match="not configured"):
             project_translations_export(
-                project=project_with_langs, language="de",
+                project=project_with_langs,
+                language="de",
             )

@@ -144,9 +144,7 @@ def project_language_remove(*, project_language):
         project=project_language.project
     )
     if not languages.exclude(pk=project_language.pk).exists():
-        raise ProjectError(
-            "Cannot delete the last language of a project."
-        )
+        raise ProjectError("Cannot delete the last language of a project.")
 
     project_language.delete()
 
@@ -168,10 +166,8 @@ def project_language_set_base(*, project_language):
     if project_language.is_base_language:
         return project_language
 
-    project_languages = (
-        ProjectLanguage.objects
-        .select_for_update()
-        .filter(project=project_language.project)
+    project_languages = ProjectLanguage.objects.select_for_update().filter(
+        project=project_language.project
     )
 
     project_languages.filter(
@@ -210,9 +206,7 @@ def project_language_bulk_add(*, project, languages_data):
             pair already exists.
     """
     base_entries = [
-        item
-        for item in languages_data
-        if item.get("is_base_language")
+        item for item in languages_data if item.get("is_base_language")
     ]
     if len(base_entries) > 1:
         raise ProjectError("Only one language can be set as base.")

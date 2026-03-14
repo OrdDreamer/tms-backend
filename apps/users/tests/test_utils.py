@@ -3,7 +3,12 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.core.exceptions import AuthError
 from apps.factories import UserFactory
-from apps.users.utils import user_change_password, user_create, user_logout, user_update
+from apps.users.utils import (
+    user_change_password,
+    user_create,
+    user_logout,
+    user_update,
+)
 
 
 @pytest.mark.django_db
@@ -15,8 +20,10 @@ class TestUserCreate:
 
     def test_with_extra_fields(self):
         user = user_create(
-            email="new@example.com", password="strongpass123",
-            first_name="John", last_name="Doe",
+            email="new@example.com",
+            password="strongpass123",
+            first_name="John",
+            last_name="Doe",
         )
         assert user.first_name == "John"
 
@@ -44,7 +51,9 @@ class TestUserChangePassword:
     def test_success(self):
         user = UserFactory()
         user_change_password(
-            user=user, current_password="testpass123", new_password="newstrongpass123",
+            user=user,
+            current_password="testpass123",
+            new_password="newstrongpass123",
         )
         assert user.check_password("newstrongpass123")
 
@@ -52,16 +61,23 @@ class TestUserChangePassword:
         user = UserFactory()
         with pytest.raises(AuthError, match="Invalid current password"):
             user_change_password(
-                user=user, current_password="wrong", new_password="newstrongpass123",
+                user=user,
+                current_password="wrong",
+                new_password="newstrongpass123",
             )
 
     def test_blacklists_tokens(self):
         user = UserFactory()
-        refresh = RefreshToken.for_user(user)
+        RefreshToken.for_user(user)
         user_change_password(
-            user=user, current_password="testpass123", new_password="newstrongpass123",
+            user=user,
+            current_password="testpass123",
+            new_password="newstrongpass123",
         )
-        from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken
+        from rest_framework_simplejwt.token_blacklist.models import (
+            BlacklistedToken,
+        )
+
         assert BlacklistedToken.objects.filter(token__user=user).exists()
 
 
@@ -71,7 +87,10 @@ class TestUserLogout:
         user = UserFactory()
         refresh = RefreshToken.for_user(user)
         user_logout(refresh_token=str(refresh))
-        from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken
+        from rest_framework_simplejwt.token_blacklist.models import (
+            BlacklistedToken,
+        )
+
         assert BlacklistedToken.objects.exists()
 
     def test_invalid_token_raises(self):

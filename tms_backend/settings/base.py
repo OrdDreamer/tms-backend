@@ -37,13 +37,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     # Third-party apps
     "corsheaders",
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
-
     # Local apps
     "apps.core",
     "apps.users",
@@ -96,20 +94,17 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         "NAME": (
-            "django.contrib.auth.password_validation."
-            "MinimumLengthValidator"
+            "django.contrib.auth.password_validation.MinimumLengthValidator"
         )
     },
     {
         "NAME": (
-            "django.contrib.auth.password_validation."
-            "CommonPasswordValidator"
+            "django.contrib.auth.password_validation.CommonPasswordValidator"
         )
     },
     {
         "NAME": (
-            "django.contrib.auth.password_validation."
-            "NumericPasswordValidator"
+            "django.contrib.auth.password_validation.NumericPasswordValidator"
         )
     },
 ]

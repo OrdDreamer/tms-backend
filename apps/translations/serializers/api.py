@@ -13,22 +13,20 @@ def _translations_dict(translation_key, project_languages=None):
 # Translation Key
 # ----------------------
 
+
 class TranslationKeyListFilterSerializer(serializers.Serializer):
     search = serializers.CharField(required=False)
     lang = serializers.CharField(required=False)
     untranslated = serializers.BooleanField(required=False, default=False)
     include_translations = serializers.BooleanField(
-        required=False,
-        default=True
+        required=False, default=True
     )
 
 
 class TranslationKeyCreateInputSerializer(serializers.Serializer):
     key = serializers.CharField(max_length=255)
     description = serializers.CharField(
-        required=False,
-        allow_blank=True,
-        default=""
+        required=False, allow_blank=True, default=""
     )
     translations = serializers.DictField(
         child=serializers.CharField(allow_blank=True),
@@ -83,6 +81,7 @@ class TranslationKeyBulkDeleteInputSerializer(serializers.Serializer):
 # ----------------------
 # Translation Value
 # ----------------------
+
 
 class TranslationValueOutputSerializer(serializers.Serializer):
     language = serializers.CharField()
