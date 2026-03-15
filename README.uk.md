@@ -2,10 +2,11 @@
 
 Django REST API для централізованого управління перекладами в проєктах.
 
-[![CI](https://github.com/orddreamer/tms-backend/actions/workflows/ci.yml/badge.svg)](https://github.com/orddreamer/tms-backend/actions/workflows/ci.yml)
+![Version](https://img.shields.io/badge/version-1.0-blue)
 ![Python 3.12](https://img.shields.io/badge/python-3.12-blue)
 ![Django 6.0](https://img.shields.io/badge/django-6.0-green)
 ![DRF 3.16](https://img.shields.io/badge/DRF-3.16-red)
+![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
 [English version README](README.md)
 
@@ -271,3 +272,7 @@ pre-commit install
 ## Внесок у проєкт
 
 Дивіться [CONTRIBUTING.md](CONTRIBUTING.md) для ознайомлення з настановами розробки та стандартами коду.
+
+---
+
+Built by [Roman Snitsarenko](https://github.com/OrdDreamer)

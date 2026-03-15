@@ -2,10 +2,11 @@
 
 Django REST API for centralized translation management across projects.
 
-[![CI](https://github.com/orddreamer/tms-backend/actions/workflows/ci.yml/badge.svg)](https://github.com/orddreamer/tms-backend/actions/workflows/ci.yml)
+![Version](https://img.shields.io/badge/version-1.0-blue)
 ![Python 3.12](https://img.shields.io/badge/python-3.12-blue)
 ![Django 6.0](https://img.shields.io/badge/django-6.0-green)
 ![DRF 3.16](https://img.shields.io/badge/DRF-3.16-red)
+![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
 [Українська версія README](README.uk.md)
 
@@ -270,3 +271,7 @@ Config files: [`pyproject.toml`](pyproject.toml), [`.pre-commit-config.yaml`](.p
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines and coding standards.
+
+---
+
+Built by [Roman Snitsarenko](https://github.com/OrdDreamer)
