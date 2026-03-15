@@ -2,7 +2,7 @@
 
 Django REST API for centralized translation management across projects.
 
-![Version](https://img.shields.io/badge/version-1.0-blue)
+![Version](https://img.shields.io/badge/version-0.1.0-blue)
 ![Python 3.12](https://img.shields.io/badge/python-3.12-blue)
 ![Django 6.0](https://img.shields.io/badge/django-6.0-green)
 ![DRF 3.16](https://img.shields.io/badge/DRF-3.16-red)
