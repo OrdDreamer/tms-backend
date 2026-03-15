@@ -202,9 +202,7 @@ Interactive docs: [Swagger UI](http://localhost:8000/api/docs/) | [ReDoc](http:/
 
 ## Database Schema
 
-Entity-relationship diagram showing the core data model.
-
-![TMS Database Schema](docs/db.png)
+See [docs/schema.md](docs/schema.md) for the full entity-relationship diagram.
 
 ## Deployment
 
