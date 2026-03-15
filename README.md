@@ -10,6 +10,10 @@ Django REST API for centralized translation management across projects.
 
 [Українська версія README](README.uk.md)
 
+## Roadmap
+
+See [docs/ROADMAP.md](docs/ROADMAP.md) for planned features and priorities.
+
 ## Tech Stack
 
 | Component     | Technology                          |
