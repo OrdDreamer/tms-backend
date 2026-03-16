@@ -12,6 +12,12 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        compress: "true"
 
   redis:
     image: redis:7-alpine
@@ -22,6 +28,12 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        compress: "true"
 
   web:
     build: .
@@ -43,6 +55,12 @@ services:
       JWT_REFRESH_TOKEN_LIFETIME_DAYS: ${JWT_REFRESH_TOKEN_LIFETIME_DAYS:-7}
       JWT_SIGNING_KEY: ${JWT_SIGNING_KEY:-}
       CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        compress: "true"
 
 volumes:
   postgres_data:
