@@ -19,7 +19,7 @@ See [docs/ROADMAP.md](docs/ROADMAP.md) for planned features and priorities.
 | Component     | Technology                          |
 | ------------- | ----------------------------------- |
 | Framework     | Django 6.0 + Django REST Framework  |
-| Database      | PostgreSQL 16                       |
+| Database      | PostgreSQL 17                       |
 | Cache         | Redis 7                             |
 | Auth          | JWT (simplejwt) with token blacklist|
 | API Docs      | drf-spectacular (Swagger / ReDoc)   |
