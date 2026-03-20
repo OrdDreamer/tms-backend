@@ -32,7 +32,7 @@ See [docs/ROADMAP.md](docs/ROADMAP.md) for planned features and priorities.
 
 ```
 apps/
-├── core/           — Base models, language choices (34 languages), exceptions
+├── core/           — Base models, language choices (40 languages), exceptions
 ├── users/          — Custom user model (email-based), authentication
 ├── projects/       — Projects and project languages
 ├── translations/   — Translation keys and values
@@ -196,9 +196,10 @@ Interactive docs: [Swagger UI](http://localhost:8000/api/docs/) | [ReDoc](http:/
 
 ### Infrastructure
 
-| Method | Endpoint       | Description  |
-| ------ | -------------- | ------------ |
-| GET    | `/api/health/` | Health check |
+| Method | Endpoint             | Description              |
+| ------ | -------------------- | ------------------------ |
+| GET    | `/api/health/`       | Health check             |
+| GET    | `/api/v1/languages/` | List available languages |
 
 ## Database Schema
 

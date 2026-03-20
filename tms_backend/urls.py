@@ -7,6 +7,7 @@ from rest_framework_simplejwt.views import (
 )
 
 from apps.core.throttling import LoginRateThrottle
+from apps.core.views import LanguageListAPIView
 from apps.translations.views import PublicProjectTranslationsAPIView
 from apps.users.views import UserLogoutAPIView
 
@@ -27,6 +28,11 @@ urlpatterns = [
         "api/v1/auth/logout/", UserLogoutAPIView.as_view(), name="auth-logout"
     ),
     path("api/", include("apps.core.urls")),
+    path(
+        "api/v1/languages/",
+        LanguageListAPIView.as_view(),
+        name="language-list",
+    ),
     path("api/v1/projects/", include("apps.projects.urls")),
     path("api/v1/users/", include("apps.users.urls")),
     path(

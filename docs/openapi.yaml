@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: TMS Backend API
-  version: 1.0.0
+  version: 0.1.0
   description: Translation Management System API
 paths:
   /api/health/:
@@ -102,6 +102,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/v1/languages/:
+    get:
+      operationId: languages_list
+      summary: List available languages
+      tags:
+      - Languages
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LanguageOutput'
           description: ''
   /api/v1/projects/:
     get:
@@ -971,6 +988,16 @@ components:
         * `bn` - বাংলা
         * `ur` - اردو
         * `sw` - Kiswahili
+    LanguageOutput:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+      required:
+      - code
+      - name
     PaginatedProjectListOutputList:
       type: object
       required:

@@ -1,3 +1,9 @@
-from apps.core.serializers.api import HealthCheckOutputSerializer
+from apps.core.serializers.api import (
+    HealthCheckOutputSerializer,
+    LanguageOutputSerializer,
+)
 
-__all__ = ["HealthCheckOutputSerializer"]
+__all__ = [
+    "HealthCheckOutputSerializer",
+    "LanguageOutputSerializer",
+]
