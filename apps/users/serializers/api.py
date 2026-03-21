@@ -31,13 +31,16 @@ class UserMeUpdateInputSerializer(serializers.Serializer):
     last_name = serializers.CharField(required=False)
 
 
-class UserLogoutInputSerializer(serializers.Serializer):
-    refresh = serializers.CharField()
+class CookieTokenObtainOutputSerializer(serializers.Serializer):
+    access = serializers.CharField()
+
+
+class CookieTokenRefreshOutputSerializer(serializers.Serializer):
+    access = serializers.CharField()
 
 
 class UserChangePasswordOutputSerializer(serializers.Serializer):
     access = serializers.CharField()
-    refresh = serializers.CharField()
 
 
 class UserChangePasswordInputSerializer(serializers.Serializer):

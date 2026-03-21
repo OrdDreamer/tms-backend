@@ -7,21 +7,84 @@ from apps.factories import UserFactory
 
 
 @pytest.mark.django_db
+class TestCookieTokenObtainPairView:
+    def test_login_returns_access_in_body(
+        self, api_client, user, user_password
+    ):
+        response = api_client.post(
+            reverse("token-obtain-pair"),
+            {"email": user.email, "password": user_password},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert "access" in response.data
+        assert "refresh" not in response.data
+
+    def test_login_sets_refresh_cookie(self, api_client, user, user_password):
+        response = api_client.post(
+            reverse("token-obtain-pair"),
+            {"email": user.email, "password": user_password},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert "refresh_token" in response.cookies
+        assert response.cookies["refresh_token"]["httponly"]
+        assert response.cookies["refresh_token"]["path"] == "/api/v1/auth/"
+
+    def test_login_invalid_credentials(self, api_client, user):
+        response = api_client.post(
+            reverse("token-obtain-pair"),
+            {"email": user.email, "password": "wrongpassword"},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert "refresh_token" not in response.cookies
+
+
+@pytest.mark.django_db
+class TestCookieTokenRefreshView:
+    def test_refresh_from_cookie(self, api_client, user):
+        refresh = RefreshToken.for_user(user)
+        api_client.cookies["refresh_token"] = str(refresh)
+        response = api_client.post(reverse("token-refresh"))
+        assert response.status_code == status.HTTP_200_OK
+        assert "access" in response.data
+        assert "refresh" not in response.data
+        assert "refresh_token" in response.cookies
+
+    def test_refresh_missing_cookie(self, api_client):
+        response = api_client.post(reverse("token-refresh"))
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_refresh_invalid_cookie(self, api_client):
+        api_client.cookies["refresh_token"] = "invalid.token.value"
+        response = api_client.post(reverse("token-refresh"))
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+@pytest.mark.django_db
 class TestUserLogoutView:
     def test_logout_success(self, api_client, user):
         refresh = RefreshToken.for_user(user)
-        response = api_client.post(
-            reverse("auth-logout"),
-            {"refresh": str(refresh)},
-        )
+        api_client.cookies["refresh_token"] = str(refresh)
+        response = api_client.post(reverse("auth-logout"))
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
-    def test_logout_invalid_token(self, api_client):
-        response = api_client.post(
-            reverse("auth-logout"),
-            {"refresh": "invalid"},
-        )
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
+    def test_logout_clears_cookie(self, api_client, user):
+        refresh = RefreshToken.for_user(user)
+        api_client.cookies["refresh_token"] = str(refresh)
+        response = api_client.post(reverse("auth-logout"))
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+        assert response.cookies["refresh_token"].value == ""
+
+    def test_logout_no_cookie(self, api_client):
+        response = api_client.post(reverse("auth-logout"))
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    def test_logout_invalid_cookie(self, api_client):
+        api_client.cookies["refresh_token"] = "invalid.token.value"
+        response = api_client.post(reverse("auth-logout"))
+        assert response.status_code == status.HTTP_204_NO_CONTENT
 
 
 @pytest.mark.django_db
@@ -99,7 +162,8 @@ class TestUserChangePasswordView:
         )
         assert response.status_code == status.HTTP_200_OK
         assert "access" in response.data
-        assert "refresh" in response.data
+        assert "refresh" not in response.data
+        assert "refresh_token" in response.cookies
 
     def test_change_password_wrong_current(self, authenticated_client, user):
         response = authenticated_client.post(

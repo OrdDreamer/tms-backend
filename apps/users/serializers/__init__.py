@@ -1,19 +1,21 @@
 from apps.users.serializers.api import (
+    CookieTokenObtainOutputSerializer,
+    CookieTokenRefreshOutputSerializer,
     UserChangePasswordInputSerializer,
     UserChangePasswordOutputSerializer,
     UserDetailOutputSerializer,
     UserListFilterSerializer,
     UserListOutputSerializer,
-    UserLogoutInputSerializer,
     UserMeUpdateInputSerializer,
 )
 
 __all__ = [
+    "CookieTokenObtainOutputSerializer",
+    "CookieTokenRefreshOutputSerializer",
     "UserChangePasswordInputSerializer",
     "UserChangePasswordOutputSerializer",
     "UserDetailOutputSerializer",
     "UserListFilterSerializer",
     "UserListOutputSerializer",
-    "UserLogoutInputSerializer",
     "UserMeUpdateInputSerializer",
 ]

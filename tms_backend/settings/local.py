@@ -1,7 +1,9 @@
 from .base import *  # noqa: F403
-from .base import BASE_DIR, REST_FRAMEWORK, env
+from .base import BASE_DIR, JWT_COOKIE, REST_FRAMEWORK, env
 
 DEBUG = True
+
+JWT_COOKIE["COOKIE_SECURE"] = False
 
 DATABASES = {
     "default": env.db(

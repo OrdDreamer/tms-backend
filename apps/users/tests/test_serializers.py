@@ -1,6 +1,5 @@
 from apps.users.serializers import (
     UserChangePasswordInputSerializer,
-    UserLogoutInputSerializer,
     UserMeUpdateInputSerializer,
 )
 
@@ -34,13 +33,6 @@ class TestUserChangePasswordInputSerializer:
         serializer = UserChangePasswordInputSerializer(data=data)
         assert not serializer.is_valid()
         assert "new_password" in serializer.errors
-
-
-class TestUserLogoutInputSerializer:
-    def test_refresh_required(self):
-        serializer = UserLogoutInputSerializer(data={})
-        assert not serializer.is_valid()
-        assert "refresh" in serializer.errors
 
 
 class TestUserMeUpdateInputSerializer:

@@ -1,27 +1,29 @@
 from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
 
 from apps.core.throttling import LoginRateThrottle
 from apps.core.views import LanguageListAPIView
 from apps.translations.views import PublicProjectTranslationsAPIView
-from apps.users.views import UserLogoutAPIView
+from apps.users.views import (
+    CookieTokenObtainPairView,
+    CookieTokenRefreshView,
+    UserLogoutAPIView,
+)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api-auth/", include("rest_framework.urls")),
     path(
         "api/v1/auth/token/",
-        TokenObtainPairView.as_view(throttle_classes=[LoginRateThrottle]),
+        CookieTokenObtainPairView.as_view(
+            throttle_classes=[LoginRateThrottle]
+        ),
         name="token-obtain-pair",
     ),
     path(
         "api/v1/auth/token/refresh/",
-        TokenRefreshView.as_view(),
+        CookieTokenRefreshView.as_view(),
         name="token-refresh",
     ),
     path(

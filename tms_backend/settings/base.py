@@ -213,6 +213,17 @@ SIMPLE_JWT = {
     "SIGNING_KEY": env("JWT_SIGNING_KEY", default=SECRET_KEY),
 }
 
+JWT_COOKIE = {
+    "REFRESH_COOKIE_NAME": env(
+        "JWT_REFRESH_COOKIE_NAME", default="refresh_token"
+    ),
+    "COOKIE_DOMAIN": env("JWT_COOKIE_DOMAIN", default=None),
+    "COOKIE_PATH": "/api/v1/auth/",
+    "COOKIE_SECURE": env.bool("JWT_COOKIE_SECURE", default=True),
+    "COOKIE_SAMESITE": env("JWT_COOKIE_SAMESITE", default="Lax"),
+    "COOKIE_HTTPONLY": True,
+}
+
 # Cache
 REDIS_URL = env("REDIS_URL", default="")
 
