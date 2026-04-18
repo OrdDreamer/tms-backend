@@ -1,7 +1,18 @@
 from .base import *  # noqa: F403
+from .base import MIDDLEWARE as BASE_MIDDLEWARE
 from .base import env
 
 DEBUG = False
+
+_middleware = list(BASE_MIDDLEWARE)
+_security_at = _middleware.index(
+    "django.middleware.security.SecurityMiddleware",
+)
+_middleware.insert(
+    _security_at + 1,
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+)
+MIDDLEWARE = _middleware
 
 DATABASES = {
     "default": env.db("DATABASE_URL"),
