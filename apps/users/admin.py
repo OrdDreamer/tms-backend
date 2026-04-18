@@ -1,3 +1,60 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-# Register your models here.
+from apps.users.models import User
+
+
+@admin.register(User)
+class UserAdmin(BaseUserAdmin):
+    """
+    Custom admin configuration for the User model.
+
+    Displays email, first_name, last_name, and permission fields.
+    Provides search by email and name fields.
+    """
+
+    list_display = (
+        "id",
+        "email",
+        "first_name",
+        "last_name",
+        "is_staff",
+        "is_superuser",
+        "is_active",
+    )
+    search_fields = ("email", "first_name", "last_name")
+    ordering = ("email",)
+    list_filter = ("is_staff", "is_superuser", "is_active")
+
+    fieldsets = (
+        (None, {"fields": ("email", "first_name", "last_name", "password")}),
+        (
+            "Permissions",
+            {
+                "fields": (
+                    "is_staff",
+                    "is_superuser",
+                    "is_active",
+                    "groups",
+                    "user_permissions",
+                )
+            },
+        ),
+        ("Important dates", {"fields": ("last_login", "date_joined")}),
+    )
+
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": (
+                    "email",
+                    "first_name",
+                    "last_name",
+                    "password1",
+                    "password2",
+                ),
+            },
+        ),
+    )

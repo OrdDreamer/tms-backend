@@ -1,0 +1,1398 @@
+openapi: 3.0.3
+info:
+  title: TMS Backend API
+  version: 0.1.0
+  description: Translation Management System API
+paths:
+  /api/health/:
+    get:
+      operationId: api_health_retrieve
+      summary: Health check
+      tags:
+      - Infrastructure
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheckOutput'
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheckOutput'
+          description: ''
+  /api/v1/auth/logout/:
+    post:
+      operationId: auth_logout_create
+      summary: Logout (blacklist refresh token)
+      description: Refresh token is read from httpOnly cookie. The cookie is cleared in the response.
+      tags:
+      - Auth
+      security:
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/v1/auth/token/:
+    post:
+      operationId: auth_token_create
+      summary: Obtain JWT pair (login)
+      description: |-
+        Returns access token in the response body. Refresh token is set as an
+        httpOnly cookie (Set-Cookie: refresh_token=...; Path=/api/v1/auth/; HttpOnly).
+      tags:
+      - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairInput'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CookieTokenObtainOutput'
+          description: ''
+        '401':
+          description: Invalid credentials
+  /api/v1/auth/token/refresh/:
+    post:
+      operationId: auth_token_refresh_create
+      summary: Refresh access token
+      description: |-
+        Reads refresh token from httpOnly cookie. Returns new access token in the
+        response body and rotates the refresh cookie.
+      tags:
+      - Auth
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CookieTokenRefreshOutput'
+          description: ''
+        '401':
+          description: Refresh token cookie missing or invalid
+  /api/v1/languages/:
+    get:
+      operationId: languages_list
+      summary: List available languages
+      tags:
+      - Languages
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LanguageOutput'
+          description: ''
+  /api/v1/projects/:
+    get:
+      operationId: projects_list
+      summary: List projects
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      tags:
+      - Projects
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProjectListOutputList'
+          description: ''
+    post:
+      operationId: projects_create
+      summary: Create a project
+      tags:
+      - Projects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectCreateInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProjectCreateInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProjectCreateInput'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDetailOutput'
+          description: ''
+  /api/v1/projects/{project_slug}/:
+    get:
+      operationId: projects_retrieve
+      summary: Retrieve a project
+      parameters:
+      - in: path
+        name: project_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Projects
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDetailOutput'
+          description: ''
+    patch:
+      operationId: projects_partial_update
+      summary: Update a project
+      parameters:
+      - in: path
+        name: project_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Projects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProjectUpdateInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProjectUpdateInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProjectUpdateInput'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDetailOutput'
+          description: ''
+    delete:
+      operationId: projects_destroy
+      summary: Delete a project
+      parameters:
+      - in: path
+        name: project_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Projects
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/projects/{project_slug}/export/:
+    get:
+      operationId: projects_export_retrieve
+      summary: Export project translations
+      parameters:
+      - in: path
+        name: project_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Projects
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/projects/{project_slug}/keys/:
+    get:
+      operationId: projects_keys_list
+      summary: List translation keys
+      parameters:
+      - in: query
+        name: include_translations
+        schema:
+          type: boolean
+        description: Include translations in the response (default true)
+      - in: query
+        name: lang
+        schema:
+          type: string
+        description: Filter by language code
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: path
+        name: project_slug
+        schema:
+          type: string
+        required: true
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Filter by key name
+      - in: query
+        name: untranslated
+        schema:
+          type: boolean
+        description: Return only keys without a translation for the given lang
+      tags:
+      - Translation Keys
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTranslationKeyListOutputList'
+          description: ''
+    post:
+      operationId: projects_keys_create
+      summary: Create a translation key
+      parameters:
+      - in: path
+        name: project_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Translation Keys
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TranslationKeyCreateInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TranslationKeyCreateInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TranslationKeyCreateInput'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranslationKeyDetailOutput'
+          description: ''
+  /api/v1/projects/{project_slug}/keys/{key_name}/:
+    get:
+      operationId: projects_keys_retrieve
+      summary: Retrieve a translation key
+      parameters:
+      - in: path
+        name: key_name
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: project_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Translation Keys
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranslationKeyDetailOutput'
+          description: ''
+    patch:
+      operationId: projects_keys_partial_update
+      summary: Update a translation key
+      parameters:
+      - in: path
+        name: key_name
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: project_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Translation Keys
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTranslationKeyUpdateInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTranslationKeyUpdateInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTranslationKeyUpdateInput'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranslationKeyDetailOutput'
+          description: ''
+    delete:
+      operationId: projects_keys_destroy
+      summary: Delete a translation key
+      parameters:
+      - in: path
+        name: key_name
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: project_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Translation Keys
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/projects/{project_slug}/keys/{key_name}/translations/:
+    get:
+      operationId: projects_keys_translations_list
+      summary: List translations for a key
+      parameters:
+      - in: path
+        name: key_name
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: project_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Translations
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TranslationValueOutput'
+          description: ''
+    patch:
+      operationId: projects_keys_translations_partial_update
+      summary: Batch create/update translations for a key
+      parameters:
+      - in: path
+        name: key_name
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: project_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Translations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTranslationBulkUpdateInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTranslationBulkUpdateInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTranslationBulkUpdateInput'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TranslationValueOutput'
+          description: ''
+  /api/v1/projects/{project_slug}/keys/{key_name}/translations/{lang_code}/:
+    put:
+      operationId: projects_keys_translations_update
+      summary: Create or replace a single translation
+      parameters:
+      - in: path
+        name: key_name
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: lang_code
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: project_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Translations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TranslationValueCreateInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TranslationValueCreateInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TranslationValueCreateInput'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranslationValueOutput'
+          description: ''
+    delete:
+      operationId: projects_keys_translations_destroy
+      summary: Remove a single translation
+      parameters:
+      - in: path
+        name: key_name
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: lang_code
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: project_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Translations
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/projects/{project_slug}/keys/bulk-delete/:
+    post:
+      operationId: projects_keys_bulk_delete_create
+      summary: Bulk delete translation keys
+      parameters:
+      - in: path
+        name: project_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Translation Keys
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TranslationKeyBulkDeleteInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TranslationKeyBulkDeleteInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TranslationKeyBulkDeleteInput'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranslationKeyBulkDeleteOutput'
+          description: ''
+  /api/v1/projects/{project_slug}/languages/:
+    get:
+      operationId: projects_languages_list
+      summary: List project languages
+      parameters:
+      - in: path
+        name: project_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Project Languages
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProjectLanguageListOutput'
+          description: ''
+    post:
+      operationId: projects_languages_create
+      summary: Add a language to a project
+      parameters:
+      - in: path
+        name: project_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Project Languages
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectLanguageCreateInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProjectLanguageCreateInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProjectLanguageCreateInput'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectLanguageListOutput'
+          description: ''
+  /api/v1/projects/{project_slug}/languages/{lang_code}/:
+    patch:
+      operationId: projects_languages_partial_update
+      summary: Update a project language
+      parameters:
+      - in: path
+        name: lang_code
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: project_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Project Languages
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProjectLanguageUpdateInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProjectLanguageUpdateInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProjectLanguageUpdateInput'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectLanguageListOutput'
+          description: ''
+    delete:
+      operationId: projects_languages_destroy
+      summary: Remove a project language
+      parameters:
+      - in: path
+        name: lang_code
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: project_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Project Languages
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/public/{project_slug}/translations/:
+    get:
+      operationId: public_translations_retrieve
+      summary: Public translations export
+      parameters:
+      - in: query
+        name: export_format
+        schema:
+          type: string
+          enum:
+          - flat
+          - nested
+        description: 'Output structure: flat (default) or nested'
+      - in: query
+        name: lang
+        schema:
+          type: string
+        description: Export a single language (ISO 639-1 code)
+      - in: path
+        name: project_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Public
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/users/:
+    get:
+      operationId: users_list
+      summary: List users
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Filter by email, first name or last name
+      tags:
+      - Users
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserListOutputList'
+          description: ''
+  /api/v1/users/{user_id}/:
+    get:
+      operationId: users_retrieve
+      summary: Retrieve user details
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Users
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetailOutput'
+          description: ''
+  /api/v1/users/me/:
+    get:
+      operationId: users_me_retrieve
+      summary: Get current user profile
+      tags:
+      - Users
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetailOutput'
+          description: ''
+    patch:
+      operationId: users_me_partial_update
+      summary: Update current user profile
+      tags:
+      - Users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserMeUpdateInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserMeUpdateInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserMeUpdateInput'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetailOutput'
+          description: ''
+  /api/v1/users/me/change-password/:
+    post:
+      operationId: users_me_change_password_create
+      summary: Change current user password
+      tags:
+      - Users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserChangePasswordInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserChangePasswordInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserChangePasswordInput'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserChangePasswordOutput'
+          description: ''
+components:
+  schemas:
+    HealthCheckOutput:
+      type: object
+      properties:
+        status:
+          type: string
+        db:
+          type: string
+      required:
+      - db
+      - status
+    LanguageEnum:
+      enum:
+      - uk
+      - en
+      - pl
+      - de
+      - fr
+      - es
+      - it
+      - pt
+      - nl
+      - cs
+      - sk
+      - ro
+      - hu
+      - bg
+      - el
+      - sv
+      - da
+      - 'no'
+      - fi
+      - ru
+      - be
+      - hr
+      - sr
+      - sl
+      - zh-CN
+      - zh-TW
+      - ja
+      - ko
+      - vi
+      - th
+      - hi
+      - ar
+      - he
+      - tr
+      - id
+      - ms
+      - fa
+      - bn
+      - ur
+      - sw
+      type: string
+      description: |-
+        * `uk` - Українська
+        * `en` - English
+        * `pl` - Polski
+        * `de` - Deutsch
+        * `fr` - Français
+        * `es` - Español
+        * `it` - Italiano
+        * `pt` - Português
+        * `nl` - Nederlands
+        * `cs` - Čeština
+        * `sk` - Slovenčina
+        * `ro` - Română
+        * `hu` - Magyar
+        * `bg` - Български
+        * `el` - Ελληνικά
+        * `sv` - Svenska
+        * `da` - Dansk
+        * `no` - Norsk
+        * `fi` - Suomi
+        * `ru` - Русский
+        * `be` - Беларуская
+        * `hr` - Hrvatski
+        * `sr` - Српски
+        * `sl` - Slovenščina
+        * `zh-CN` - 简体中文
+        * `zh-TW` - 繁體中文
+        * `ja` - 日本語
+        * `ko` - 한국어
+        * `vi` - Tiếng Việt
+        * `th` - ไทย
+        * `hi` - हिन्दी
+        * `ar` - العربية
+        * `he` - עברית
+        * `tr` - Türkçe
+        * `id` - Bahasa Indonesia
+        * `ms` - Bahasa Melayu
+        * `fa` - فارسی
+        * `bn` - বাংলা
+        * `ur` - اردو
+        * `sw` - Kiswahili
+    LanguageOutput:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+      required:
+      - code
+      - name
+    PaginatedProjectListOutputList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectListOutput'
+    PaginatedTranslationKeyListOutputList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/TranslationKeyListOutput'
+    PaginatedUserListOutputList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserListOutput'
+    PatchedProjectLanguageUpdateInput:
+      type: object
+      properties:
+        is_base_language:
+          type: boolean
+    PatchedProjectUpdateInput:
+      type: object
+      properties:
+        slug:
+          type: string
+          maxLength: 100
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+    PatchedTranslationBulkUpdateInput:
+      type: object
+      properties:
+        translations:
+          type: object
+          additionalProperties:
+            type: string
+    PatchedTranslationKeyUpdateInput:
+      type: object
+      properties:
+        key:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+    PatchedUserMeUpdateInput:
+      type: object
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+    ProjectCreateInput:
+      type: object
+      properties:
+        slug:
+          type: string
+          maxLength: 100
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+          default: ''
+      required:
+      - name
+      - slug
+    ProjectDetailOutput:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+        description:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        languages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectLanguageListOutput'
+      required:
+      - created_at
+      - description
+      - id
+      - languages
+      - name
+      - slug
+      - updated_at
+    ProjectLanguageCreateInput:
+      type: object
+      properties:
+        language:
+          $ref: '#/components/schemas/LanguageEnum'
+        is_base_language:
+          type: boolean
+          default: false
+      required:
+      - language
+    ProjectLanguageListOutput:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        language:
+          type: string
+        is_base_language:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - created_at
+      - id
+      - is_base_language
+      - language
+    ProjectListOutput:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+        description:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - created_at
+      - description
+      - id
+      - name
+      - slug
+      - updated_at
+    CookieTokenObtainOutput:
+      type: object
+      properties:
+        access:
+          type: string
+      required:
+      - access
+    CookieTokenRefreshOutput:
+      type: object
+      properties:
+        access:
+          type: string
+      required:
+      - access
+    TokenObtainPairInput:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          writeOnly: true
+      required:
+      - email
+      - password
+      - refresh
+    TranslationKeyBulkDeleteInput:
+      type: object
+      properties:
+        keys:
+          type: array
+          items:
+            type: string
+          minItems: 1
+      required:
+      - keys
+    TranslationKeyBulkDeleteOutput:
+      type: object
+      properties:
+        deleted_count:
+          type: integer
+      required:
+      - deleted_count
+    TranslationKeyCreateInput:
+      type: object
+      properties:
+        key:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+          default: ''
+        translations:
+          type: object
+          additionalProperties:
+            type: string
+      required:
+      - key
+    TranslationKeyDetailOutput:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        key:
+          type: string
+        description:
+          type: string
+        translations:
+          type: object
+          additionalProperties:
+            type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - created_at
+      - description
+      - id
+      - key
+      - translations
+      - updated_at
+    TranslationKeyListOutput:
+      type: object
+      properties:
+        key:
+          type: string
+        description:
+          type: string
+        translations:
+          type: object
+          additionalProperties:
+            type: string
+          readOnly: true
+      required:
+      - description
+      - key
+      - translations
+    TranslationValueCreateInput:
+      type: object
+      properties:
+        value:
+          type: string
+      required:
+      - value
+    TranslationValueOutput:
+      type: object
+      properties:
+        language:
+          type: string
+        value:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - created_at
+      - language
+      - updated_at
+      - value
+    UserChangePasswordInput:
+      type: object
+      properties:
+        current_password:
+          type: string
+          writeOnly: true
+        new_password:
+          type: string
+          writeOnly: true
+          minLength: 8
+        new_password_confirm:
+          type: string
+          writeOnly: true
+          minLength: 8
+      required:
+      - current_password
+      - new_password
+      - new_password_confirm
+    UserChangePasswordOutput:
+      type: object
+      properties:
+        access:
+          type: string
+      required:
+      - access
+    UserDetailOutput:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+          format: email
+        first_name:
+          type: string
+        last_name:
+          type: string
+        date_joined:
+          type: string
+          format: date-time
+        last_login:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - date_joined
+      - email
+      - first_name
+      - id
+      - last_login
+      - last_name
+    UserListOutput:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+          format: email
+        first_name:
+          type: string
+        last_name:
+          type: string
+        date_joined:
+          type: string
+          format: date-time
+      required:
+      - date_joined
+      - email
+      - first_name
+      - id
+      - last_name
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
